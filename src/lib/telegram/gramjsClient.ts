@@ -1,4 +1,4 @@
-import { TelegramClient } from "telegram";
+import { TelegramClient, Api } from "telegram";
 import { StringSession } from "telegram/sessions";
 import { CustomFile } from "telegram/client/uploads";
 import {
@@ -83,7 +83,7 @@ export class GramJsTelegramService implements ITelegramService {
 
     try {
       await client.invoke(
-        new (await import("telegram/tl")).Api.auth.SignIn({
+        new Api.auth.SignIn({
           phoneNumber: cleanPhone,
           phoneCodeHash,
           phoneCode,
