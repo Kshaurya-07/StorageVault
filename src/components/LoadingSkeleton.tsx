@@ -45,3 +45,5 @@ export function FileTableSkeleton() {
     </div>
   );
 }
+
+export default FileGridSkeleton;

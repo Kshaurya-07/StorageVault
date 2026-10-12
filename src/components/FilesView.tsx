@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Header from "@/components/Header";
-import FileCard from "@/components/FileCard";
-import FileListRow from "@/components/FileListRow";
-import FilePreviewModal from "@/components/FilePreviewModal";
-import EmptyState from "@/components/EmptyState";
-import { FileGridSkeleton, FileTableSkeleton } from "@/components/LoadingSkeleton";
+import Header from "./Header";
+import FileCard from "./FileCard";
+import FileListRow from "./FileListRow";
+import FilePreviewModal from "./FilePreviewModal";
+import EmptyState from "./EmptyState";
+import { FileGridSkeleton, FileTableSkeleton } from "./LoadingSkeleton";
 import { FileCategory, FileMetadata } from "@/lib/types";
 import {
   Grid,
