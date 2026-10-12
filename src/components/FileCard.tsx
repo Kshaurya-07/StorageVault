@@ -42,17 +42,17 @@ export default function FileCard({
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case "DOCUMENT":
-        return <FileText className="w-8 h-8 text-blue-400" />;
+        return <FileText className="w-8 h-8 text-neutral-200" />;
       case "IMAGE":
-        return <ImageIcon className="w-8 h-8 text-emerald-400" />;
+        return <ImageIcon className="w-8 h-8 text-neutral-200" />;
       case "VIDEO":
-        return <Video className="w-8 h-8 text-purple-400" />;
+        return <Video className="w-8 h-8 text-neutral-200" />;
       case "AUDIO":
-        return <Music className="w-8 h-8 text-amber-400" />;
+        return <Music className="w-8 h-8 text-neutral-200" />;
       case "ARCHIVE":
-        return <Archive className="w-8 h-8 text-rose-400" />;
+        return <Archive className="w-8 h-8 text-neutral-200" />;
       default:
-        return <File className="w-8 h-8 text-slate-400" />;
+        return <File className="w-8 h-8 text-neutral-400" />;
     }
   };
 
@@ -86,20 +86,20 @@ export default function FileCard({
             onClick={() => onToggleFavorite(file.id, file.isFavorite)}
             className={`p-1.5 rounded-lg transition ${
               file.isFavorite
-                ? "text-amber-400 hover:text-amber-300"
-                : "text-slate-500 hover:text-slate-300 hover:bg-white/5 opacity-0 group-hover:opacity-100"
+                ? "text-white hover:text-neutral-300"
+                : "text-neutral-500 hover:text-neutral-300 hover:bg-white/5 opacity-0 group-hover:opacity-100"
             }`}
             title={file.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
           >
             <Star
-              className={`w-3.5 h-3.5 ${file.isFavorite ? "fill-amber-400" : ""}`}
+              className={`w-3.5 h-3.5 ${file.isFavorite ? "fill-white" : ""}`}
             />
           </button>
 
           {/* Quick Download */}
           <button
             onClick={handleDownload}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 opacity-0 group-hover:opacity-100 transition"
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 opacity-0 group-hover:opacity-100 transition"
             title="Download from Telegram"
           >
             <Download className="w-3.5 h-3.5" />
@@ -108,7 +108,7 @@ export default function FileCard({
           {/* Delete */}
           <button
             onClick={() => onDelete(file.id)}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition"
+            className="p-1.5 rounded-lg text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 opacity-0 group-hover:opacity-100 transition"
             title="Delete file"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -119,12 +119,12 @@ export default function FileCard({
       {/* Thumbnail / Icon Center Area */}
       <div
         onClick={() => onPreview(file)}
-        className="h-28 rounded-xl bg-slate-900/60 border border-white/5 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-800/60 transition group-hover:border-blue-500/20 mb-3"
+        className="h-28 rounded-xl bg-neutral-900/80 border border-neutral-800 flex flex-col items-center justify-center cursor-pointer hover:bg-neutral-850 hover:border-neutral-700 transition mb-3"
       >
-        <div className="p-3 rounded-2xl bg-white/5 group-hover:scale-110 transition-transform">
+        <div className="p-3 rounded-2xl bg-neutral-800 border border-neutral-750 group-hover:scale-105 transition-transform">
           {getCategoryIcon(file.category)}
         </div>
-        <span className="text-[10px] text-slate-400 mt-2">Click to preview</span>
+        <span className="text-[10px] text-neutral-400 mt-2 font-mono">Preview Asset</span>
       </div>
 
       {/* File Info */}
@@ -137,9 +137,9 @@ export default function FileCard({
               onChange={(e) => setNewName(e.target.value)}
               autoFocus
               onBlur={() => setIsRenaming(false)}
-              className="bg-slate-900 border border-blue-500 rounded px-2 py-0.5 text-xs text-white w-full"
+              className="bg-neutral-900 border border-neutral-600 rounded px-2 py-0.5 text-xs text-white w-full"
             />
-            <button type="submit" className="text-emerald-400 p-0.5">
+            <button type="submit" className="text-white p-0.5">
               <Check className="w-3.5 h-3.5" />
             </button>
           </form>
@@ -147,14 +147,14 @@ export default function FileCard({
           <div className="flex items-center justify-between gap-1 group/title">
             <h3
               onClick={() => onPreview(file)}
-              className="text-xs font-semibold text-white truncate cursor-pointer hover:text-blue-400 transition"
+              className="text-xs font-semibold text-white truncate cursor-pointer hover:underline transition"
               title={file.displayFilename}
             >
               {file.displayFilename}
             </h3>
             <button
               onClick={() => setIsRenaming(true)}
-              className="text-slate-500 hover:text-slate-300 opacity-0 group-hover/title:opacity-100 p-0.5"
+              className="text-neutral-500 hover:text-neutral-300 opacity-0 group-hover/title:opacity-100 p-0.5"
               title="Rename file"
             >
               <Edit2 className="w-3 h-3" />
@@ -162,7 +162,7 @@ export default function FileCard({
           </div>
         )}
 
-        <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+        <div className="flex items-center justify-between text-[11px] text-neutral-400 pt-1 font-mono">
           <span>{formatBytes(file.fileSizeBytes)}</span>
           <span>{new Date(file.uploadedAt).toLocaleDateString()}</span>
         </div>

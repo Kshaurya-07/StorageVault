@@ -83,7 +83,7 @@ export class MockTelegramService implements ITelegramService {
       needs2FA: false,
       telegramUserId: sanitizedId,
       telegramUsername: `user_${sanitizedId.slice(-4)}`,
-      telegramFirstName: "Vault Telegram User",
+      telegramFirstName: "StorageVault User",
       sessionString: mockSession,
     };
   }
@@ -182,7 +182,7 @@ export class MockTelegramService implements ITelegramService {
       valid: true,
       telegramUserId: "mock_tg_id",
       username: "vault_user",
-      firstName: "Vault Telegram User",
+      firstName: "StorageVault User",
     };
   }
 }

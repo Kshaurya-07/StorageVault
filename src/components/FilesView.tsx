@@ -18,6 +18,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 
+import Document3DPreview from "./3d/Document3DPreview";
+
 interface FilesViewProps {
   title: string;
   category?: FileCategory;
@@ -138,21 +140,37 @@ export default function FilesView({
         }}
       />
 
-      <main className="p-8 max-w-7xl mx-auto w-full space-y-6">
+      <main className="p-6 md:p-8 max-w-7xl mx-auto w-full space-y-6">
+        {/* 3D Asset Header Block */}
+        <div className="glass-panel p-5 rounded-3xl border border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-1.5 text-center md:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 text-[11px] font-mono">
+              SOVEREIGN CLOUD DIRECTORY
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">{title}</h2>
+            <p className="text-xs text-neutral-400 max-w-md">
+              Encrypted files stored in personal Telegram Saved Messages, indexed into isolated metadata partitions.
+            </p>
+          </div>
+          <div className="w-full md:w-64 h-[120px] flex items-center justify-center">
+            <Document3DPreview className="w-full h-full" />
+          </div>
+        </div>
+
         {/* Controls Toolbar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-4 rounded-2xl border border-white/5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-4 rounded-2xl border border-neutral-800">
           {/* In-page search */}
           <form
             onSubmit={handleSearchSubmit}
             className="relative flex-1 max-w-sm flex items-center"
           >
-            <Search className="w-4 h-4 text-slate-400 absolute left-3" />
+            <Search className="w-4 h-4 text-neutral-500 absolute left-3" />
             <input
               type="text"
               placeholder={`Search in ${title}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#11192e] border border-white/10 rounded-xl pl-9 pr-8 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
+              className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-500"
             />
             {searchQuery && (
               <button
@@ -161,7 +179,7 @@ export default function FilesView({
                   setSearchQuery("");
                   setTimeout(fetchFiles, 50);
                 }}
-                className="absolute right-2 text-slate-400 hover:text-white text-xs"
+                className="absolute right-2 text-neutral-400 hover:text-white text-xs"
               >
                 ✕
               </button>
@@ -169,14 +187,14 @@ export default function FilesView({
           </form>
 
           {/* Sort & View Mode Switches */}
-          <div className="flex items-center gap-3 self-end sm:self-auto">
+          <div className="flex items-center gap-3 self-end sm:self-auto font-mono">
             {/* Sort Selector */}
-            <div className="flex items-center gap-1.5 text-xs text-slate-300">
-              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+            <div className="flex items-center gap-1.5 text-xs text-neutral-300">
+              <ArrowUpDown className="w-3.5 h-3.5 text-neutral-400" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-[#11192e] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                className="bg-neutral-900 border border-neutral-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none"
               >
                 <option value="uploadedAt">Upload Date</option>
                 <option value="size">File Size</option>
@@ -184,7 +202,7 @@ export default function FilesView({
               </select>
               <button
                 onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                className="p-1.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-300 transition"
+                className="p-1.5 rounded-xl border border-neutral-800 hover:bg-neutral-800 text-neutral-300 transition"
                 title={`Order: ${sortOrder.toUpperCase()}`}
               >
                 {sortOrder === "asc" ? "↑" : "↓"}
@@ -194,20 +212,20 @@ export default function FilesView({
             {/* Refresh */}
             <button
               onClick={fetchFiles}
-              className="p-2 rounded-xl border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white transition"
+              className="p-2 rounded-xl border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-white transition"
               title="Refresh files"
             >
               <RefreshCw className="w-3.5 h-3.5" />
             </button>
 
             {/* Grid / List View Toggle */}
-            <div className="flex items-center bg-[#11192e] p-1 rounded-xl border border-white/10">
+            <div className="flex items-center bg-neutral-900 p-1 rounded-xl border border-neutral-800">
               <button
                 onClick={() => setViewMode("grid")}
                 className={`p-1.5 rounded-lg transition ${
                   viewMode === "grid"
-                    ? "bg-blue-600 text-white shadow"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-white text-black font-semibold shadow"
+                    : "text-neutral-400 hover:text-white"
                 }`}
                 title="Grid view"
               >
@@ -217,8 +235,8 @@ export default function FilesView({
                 onClick={() => setViewMode("list")}
                 className={`p-1.5 rounded-lg transition ${
                   viewMode === "list"
-                    ? "bg-blue-600 text-white shadow"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-white text-black font-semibold shadow"
+                    : "text-neutral-400 hover:text-white"
                 }`}
                 title="List view"
               >

@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
+import Shield3DVault from "@/components/3d/Shield3DVault";
 import {
   ShieldCheck,
   Lock,
@@ -8,7 +9,6 @@ import {
   EyeOff,
   ServerOff,
   KeyRound,
-  FileCheck,
   CheckCircle2,
 } from "lucide-react";
 
@@ -18,7 +18,7 @@ export default function PrivacyPage() {
       icon: EyeOff,
       title: "No AI Training on User Files or Queries",
       description:
-        "VAULT AI strictly enforces contractual and architectural zero-training policies. Neither your search prompts nor your file metadata are ever used to train or fine-tune machine learning models.",
+        "StorageVault strictly enforces contractual and architectural zero-training policies. Neither your search prompts nor your file metadata are ever used to train or fine-tune machine learning models.",
     },
     {
       icon: ServerOff,
@@ -42,13 +42,13 @@ export default function PrivacyPage() {
       icon: Cpu,
       title: "Ephemeral AI Processing & Zero Memory",
       description:
-        "AI queries are processed strictly on demand. There is no persistent cross-session conversational memory, no persistent user profiling, and no autonomous background scanning.",
+        "AI queries are processed strictly on demand into database filters. There is no persistent cross-session conversational memory, no persistent user profiling, and no autonomous background scanning.",
     },
     {
       icon: ShieldCheck,
       title: "Personal Saved Messages Routing",
       description:
-        "Unlike insecure bot-based apps that dump all user files into a shared channel, VAULT AI connects to each user's personal Telegram account and operates solely within their private 'Saved Messages' dialogue.",
+        "Unlike insecure bot-based apps that dump all user files into a shared channel, StorageVault connects to each user's personal Telegram account and operates solely within their private 'Saved Messages' dialogue.",
     },
   ];
 
@@ -56,22 +56,26 @@ export default function PrivacyPage() {
     <>
       <Header title="Privacy & Security Architecture" />
 
-      <main className="p-8 max-w-5xl mx-auto w-full space-y-8">
-        {/* Hero Banner */}
-        <div className="glass-panel rounded-3xl p-8 border border-white/10 relative overflow-hidden">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-white mb-1">
-                Zero-Knowledge, Sovereign Cloud Architecture
+      <main className="p-6 md:p-8 max-w-5xl mx-auto w-full space-y-8">
+        {/* Hero Banner with 3D Shield */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-neutral-800 relative overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            <div className="md:col-span-8 space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-semibold">
+                <ShieldCheck className="w-3.5 h-3.5 text-neutral-400" />
+                <span>Zero-Knowledge Sovereign Cloud</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                Cryptographic Privacy Specification
               </h2>
-              <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
-                VAULT AI was built on the core principle that cloud storage should belong to the
-                user. By combining Telegram&apos;s global MTProto infrastructure with strict local
+              <p className="text-xs text-neutral-400 leading-relaxed max-w-2xl">
+                StorageVault was built on the core principle that cloud storage should belong strictly to the
+                user. By combining Telegram&apos;s global MTProto infrastructure with strict client-side
                 cryptography and privacy-first AI, your data remains 100% private to you.
               </p>
+            </div>
+            <div className="md:col-span-4 h-[160px] flex items-center justify-center">
+              <Shield3DVault className="w-full h-full" />
             </div>
           </div>
         </div>
@@ -83,13 +87,13 @@ export default function PrivacyPage() {
             return (
               <div
                 key={idx}
-                className="glass-card rounded-2xl p-6 border border-white/5 space-y-2.5"
+                className="glass-card rounded-2xl p-6 border border-neutral-800 space-y-3"
               >
-                <div className="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-neutral-800 border border-neutral-700 text-white flex items-center justify-center">
                   <Icon className="w-5 h-5" />
                 </div>
                 <h3 className="text-sm font-bold text-white">{pillar.title}</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs text-neutral-400 leading-relaxed">
                   {pillar.description}
                 </p>
               </div>
@@ -98,7 +102,7 @@ export default function PrivacyPage() {
         </div>
 
         {/* Compliance & Guarantees Checklist */}
-        <div className="glass-panel rounded-3xl p-6 border border-white/10 space-y-4">
+        <div className="glass-panel rounded-3xl p-6 border border-neutral-800 space-y-4">
           <h3 className="text-sm font-bold text-white">System Privacy Guarantees</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             {[
@@ -109,8 +113,8 @@ export default function PrivacyPage() {
               "Instant complete account & session purging",
               "Pre-query isolation before AI prompt formatting",
             ].map((item, idx) => (
-              <div key={idx} className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div key={idx} className="flex items-center gap-2 text-neutral-300">
+                <CheckCircle2 className="w-4 h-4 text-white shrink-0" />
                 <span>{item}</span>
               </div>
             ))}

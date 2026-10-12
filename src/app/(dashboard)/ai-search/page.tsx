@@ -7,17 +7,14 @@ import FileCard from "@/components/FileCard";
 import FilePreviewModal from "@/components/FilePreviewModal";
 import EmptyState from "@/components/EmptyState";
 import { FileGridSkeleton } from "@/components/LoadingSkeleton";
+import NodeMesh3D from "@/components/3d/NodeMesh3D";
 import { AiSearchResult, FileMetadata } from "@/lib/types";
 import {
   Sparkles,
   Search,
   ShieldCheck,
   Tag,
-  Calendar,
-  Layers,
-  HardDrive,
   Loader2,
-  Info,
   CheckCircle2,
 } from "lucide-react";
 
@@ -115,21 +112,26 @@ function AiSearchContent() {
     <>
       <Header title="AI File Search Assistant" />
 
-      <main className="p-8 max-w-7xl mx-auto w-full space-y-8">
-        {/* Hero Search Box */}
-        <div className="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
-          <div className="max-w-3xl mx-auto text-center space-y-3 mb-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Zero-Retention Privacy-Safe AI</span>
+      <main className="p-6 md:p-8 max-w-7xl mx-auto w-full space-y-8">
+        {/* Hero Search Box with 3D Neural Discovery Orb */}
+        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-neutral-800 shadow-2xl relative overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center mb-6">
+            <div className="md:col-span-8 space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-semibold">
+                <Sparkles className="w-3.5 h-3.5 text-neutral-400" />
+                <span>Zero-Retention Privacy-Safe AI</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                Search Your StorageVault in Plain English
+              </h2>
+              <p className="text-xs text-neutral-400 leading-relaxed max-w-xl">
+                Query files by topic, temporal references, size range, or file categories.
+                Queries are processed ephemerally into deterministic database filters and never retained.
+              </p>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-              Search Your Vault in Plain English
-            </h2>
-            <p className="text-xs text-slate-300">
-              Query files by topic, date, size range, or category. Queries are processed
-              ephemerally and never used for model training.
-            </p>
+            <div className="md:col-span-4 h-[160px] flex items-center justify-center">
+              <NodeMesh3D isSearching={loading} className="w-full h-full" />
+            </div>
           </div>
 
           {/* Search Input Form */}
@@ -139,15 +141,15 @@ function AiSearchContent() {
               placeholder="e.g. 'Find my Java notes' or 'Show PDFs uploaded last week'..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full bg-[#11192e] border border-white/10 focus:border-blue-500 rounded-2xl pl-5 pr-28 py-3.5 text-sm text-white placeholder-slate-400 focus:outline-none shadow-xl transition"
+              className="w-full bg-neutral-900 border border-neutral-800 focus:border-neutral-500 rounded-2xl pl-5 pr-28 py-3.5 text-sm text-white placeholder-neutral-500 focus:outline-none shadow-xl transition"
             />
             <button
               type="submit"
               disabled={loading || !query.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-semibold text-xs px-5 py-2 rounded-xl transition"
+              className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2 bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-semibold text-xs px-5 py-2 rounded-xl transition shadow-md"
             >
               {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin text-black" />
               ) : (
                 <>
                   <Sparkles className="w-3.5 h-3.5" />
@@ -159,7 +161,7 @@ function AiSearchContent() {
 
           {/* Prompt pills */}
           <div className="max-w-2xl mx-auto flex flex-wrap items-center justify-center gap-2 text-xs">
-            <span className="text-slate-400 text-[11px]">Try queries:</span>
+            <span className="text-neutral-500 text-[11px] font-mono">Suggested:</span>
             {sampleQueries.map((sample, idx) => (
               <button
                 key={idx}
@@ -168,7 +170,7 @@ function AiSearchContent() {
                   setQuery(sample);
                   handleSearch(sample);
                 }}
-                className="px-2.5 py-1 rounded-lg bg-slate-900/80 hover:bg-blue-600/20 text-slate-300 hover:text-blue-300 border border-white/5 transition text-[11px]"
+                className="px-2.5 py-1 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 transition text-[11px]"
               >
                 &quot;{sample}&quot;
               </button>
@@ -180,16 +182,16 @@ function AiSearchContent() {
         {result && (
           <div className="space-y-6 animate-fade-in">
             {/* Explanation & Filter Breakdown Bar */}
-            <div className="p-4 rounded-2xl bg-blue-950/20 border border-blue-500/20 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2.5 text-blue-300 font-medium">
-                <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
+            <div className="p-4 rounded-2xl bg-neutral-900 border border-neutral-800 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2.5 text-neutral-200 font-medium">
+                <CheckCircle2 className="w-4 h-4 text-white shrink-0" />
                 <span>{result.explanation}</span>
               </div>
 
               {/* Suggested Tags */}
               {result.suggestedTags && result.suggestedTags.length > 0 && (
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                  <span className="text-[11px] text-neutral-400 flex items-center gap-1 font-mono">
                     <Tag className="w-3 h-3" /> Related:
                   </span>
                   {result.suggestedTags.map((t, idx) => (
@@ -200,7 +202,7 @@ function AiSearchContent() {
                         setQuery(newQ);
                         handleSearch(newQ);
                       }}
-                      className="px-2 py-0.5 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-semibold border border-blue-500/20 transition"
+                      className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-750 text-neutral-200 text-[10px] font-semibold border border-neutral-700 transition"
                     >
                       #{t}
                     </button>
@@ -213,7 +215,7 @@ function AiSearchContent() {
             {result.matchedFiles.length === 0 ? (
               <EmptyState
                 icon={Search}
-                title="No Matching Files in Your Vault"
+                title="No Matching Files in Your StorageVault"
                 description={`AI scanned your private files for "${result.query}" but found no matching records. Try broader keywords or different size/date constraints.`}
               />
             ) : (
@@ -236,13 +238,13 @@ function AiSearchContent() {
         {loading && <FileGridSkeleton />}
 
         {/* Privacy Guarantee Footer Card */}
-        <div className="p-4 rounded-2xl bg-[#0c1222] border border-white/5 flex items-center justify-between text-xs text-slate-400">
-          <div className="flex items-center gap-2 text-emerald-400">
-            <ShieldCheck className="w-4 h-4" />
-            <span className="font-semibold text-slate-300">Strict AI Privacy Policy:</span>
+        <div className="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 flex items-center justify-between text-xs text-neutral-400">
+          <div className="flex items-center gap-2 text-neutral-300">
+            <ShieldCheck className="w-4 h-4 text-white" />
+            <span className="font-semibold text-white">Strict AI Privacy Policy:</span>
             <span>Zero personal memory persistence. Zero model training. Owner-scoped only.</span>
           </div>
-          <span className="hidden sm:inline">VAULT AI Engine v1.0</span>
+          <span className="hidden sm:inline font-mono text-[11px]">StorageVault AI Engine v1.0</span>
         </div>
       </main>
 

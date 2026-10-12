@@ -2,7 +2,7 @@
   "name": "vault-ai",
   "version": "1.0.0",
   "private": true,
-  "description": "VAULT AI - Premium Cloud Storage Platform Powered by Personal Telegram Saved Messages",
+  "description": "StorageVault - Premium Cloud Storage Platform Powered by Personal Telegram Saved Messages",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

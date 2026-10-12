@@ -1,4 +1,4 @@
-# VAULT AI
+# StorageVault
 
 > **Premium, multi-user, zero-knowledge cloud storage platform powered by your own Telegram account's Saved Messages.**
 
@@ -12,11 +12,11 @@
 
 ## 📖 Overview
 
-**VAULT AI** turns every user's personal Telegram account into an unlimited, private cloud drive. Unlike legacy storage providers that enforce strict storage limits and charge expensive monthly subscriptions, or insecure bot apps that dump all users' files into a shared channel, **VAULT AI connects to each user's personal Telegram account and operates solely within their private "Saved Messages" dialogue**.
+**StorageVault** turns every user's personal Telegram account into an unlimited, private cloud drive. Unlike legacy storage providers that enforce strict storage limits and charge expensive monthly subscriptions, or insecure bot apps that dump all users' files into a shared channel, **StorageVault connects to each user's personal Telegram account and operates solely within their private "Saved Messages" dialogue**.
 
 ```
-USER A -> VAULT Account A -> Telegram Account A -> Saved Messages A -> User A's files
-USER B -> VAULT Account B -> Telegram Account B -> Saved Messages B -> User B's files
+USER A -> StorageVault Account A -> Telegram Account A -> Saved Messages A -> User A's files
+USER B -> StorageVault Account B -> Telegram Account B -> Saved Messages B -> User B's files
 ```
 
 ### Core Value Propositions
@@ -33,7 +33,7 @@ USER B -> VAULT Account B -> Telegram Account B -> Saved Messages B -> User B's 
 ```mermaid
 flowchart TD
     subgraph Client["Browser (React / Next.js)"]
-        UI["VAULT AI Web Interface"]
+        UI["StorageVault Web Interface"]
     end
 
     subgraph Server["Next.js App Server"]
@@ -64,7 +64,7 @@ flowchart TD
 
 ## 🚀 Features & Pages
 
-VAULT AI provides a complete suite of 18 dedicated pages and tools:
+StorageVault provides a complete suite of 18 dedicated pages and tools:
 
 1. **Landing Page (`/`)**: Value proposition, architecture breakdown, and interactive onboarding flow.
 2. **Register (`/register`)**: New account creation with password hashing and session tokens.
@@ -154,7 +154,7 @@ To connect live Telegram accounts rather than the mock adapter:
 
 1. Log in to [my.telegram.org](https://my.telegram.org) with your Telegram phone number.
 2. Select **API development tools**.
-3. Create a new application (e.g. app name: `VAULT AI`).
+3. Create a new application (e.g. app name: `StorageVault`).
 4. Copy your `api_id` (integer) and `api_hash` (string).
 5. Update your `.env`:
    ```env
@@ -168,7 +168,7 @@ To connect live Telegram accounts rather than the mock adapter:
 
 ## 🤖 Privacy-Strict AI Search
 
-VAULT AI's AI Assistant parses natural language queries into exact database and semantic filters without retaining personal memories:
+StorageVault's AI Assistant parses natural language queries into exact database and semantic filters without retaining personal memories:
 
 ### Example Supported Queries:
 - `"Find my Java notes"` → Category: `DOCUMENT`, Keywords: `["java", "notes"]`

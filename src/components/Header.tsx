@@ -58,17 +58,17 @@ export default function Header({
 
   return (
     <>
-      <header className="h-16 border-b border-white/5 bg-[#090d16]/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-6">
+      <header className="h-16 border-b border-neutral-800/80 bg-[#0a0a0a]/90 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-6">
         <div className="flex items-center gap-3">
           <button
             onClick={toggle}
-            className="lg:hidden p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/5 transition"
+            className="lg:hidden p-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 transition"
             aria-label="Toggle navigation menu"
           >
             <Menu className="w-5 h-5" />
           </button>
           <h1 className="text-lg font-bold text-white capitalize truncate">
-            {title || "Vault Dashboard"}
+            {title || "StorageVault Dashboard"}
           </h1>
         </div>
 
@@ -77,13 +77,13 @@ export default function Header({
           onSubmit={handleSearchSubmit}
           className="relative max-w-md w-full mx-6 hidden sm:block"
         >
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search by name, tag, or AI query (e.g. 'Show PDFs > 50MB')..."
             value={searchVal}
             onChange={(e) => setSearchVal(e.target.value)}
-            className="w-full bg-[#11192e] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+            className="w-full bg-neutral-900/90 border border-neutral-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-500 focus:ring-1 focus:ring-neutral-500 transition"
           />
         </form>
 
@@ -94,27 +94,27 @@ export default function Header({
             href="/connect-telegram"
             className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition ${
               tgStatus.connected
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20"
-                : "bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
+                ? "bg-neutral-900 border-neutral-700 text-neutral-200 hover:bg-neutral-800"
+                : "bg-neutral-900/60 border-neutral-800 text-neutral-400 hover:bg-neutral-800"
             }`}
           >
-            <Send className="w-3 h-3" />
+            <Send className="w-3 h-3 text-neutral-400" />
             <span>
               {tgStatus.connected
                 ? `@${tgStatus.username || "Saved Messages"}`
                 : "Connect Telegram"}
             </span>
-            {tgStatus.connected ? (
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            ) : (
-              <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
-            )}
+            <div
+              className={`w-2 h-2 rounded-full ${
+                tgStatus.connected ? "bg-white animate-pulse" : "bg-neutral-600"
+              }`}
+            />
           </Link>
 
           {/* Upload Button */}
           <button
             onClick={() => setIsUploadOpen(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-lg shadow-blue-600/20 hover:scale-[1.02] active:scale-[0.98] transition"
+            className="flex items-center gap-2 bg-white hover:bg-neutral-200 text-black text-xs font-semibold px-4 py-2 rounded-xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition"
           >
             <Upload className="w-3.5 h-3.5" />
             <span>Upload File</span>
@@ -123,7 +123,7 @@ export default function Header({
           {/* User profile dropdown / avatar */}
           <Link
             href="/settings"
-            className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-xs font-bold text-white hover:border-blue-500 transition"
+            className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs font-bold text-white hover:border-neutral-600 transition"
             title={user?.email || "Account"}
           >
             {user?.name ? user.name[0].toUpperCase() : user?.email ? user.email[0].toUpperCase() : <UserIcon className="w-4 h-4" />}

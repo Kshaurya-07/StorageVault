@@ -2,16 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
+import DataPillar3D from "@/components/3d/DataPillar3D";
 import { StorageAnalyticsData } from "@/lib/types";
-import { formatBytes, getCategoryBadgeColor } from "@/lib/fileCategories";
+import { formatBytes } from "@/lib/fileCategories";
 import {
   BarChart3,
   HardDrive,
   FolderOpen,
   Clock,
   TrendingUp,
-  FileText,
-  ShieldCheck,
   AlertCircle,
   Download,
 } from "lucide-react";
@@ -33,91 +32,114 @@ export default function AnalyticsPage() {
   if (loading) {
     return (
       <>
-        <Header title="Storage Analytics" />
-        <main className="p-8 max-w-7xl mx-auto w-full space-y-6">
-          <div className="h-40 rounded-2xl bg-slate-900/60 animate-pulse" />
+        <Header title="StorageVault Analytics" />
+        <main className="p-6 md:p-8 max-w-7xl mx-auto w-full space-y-6">
+          <div className="h-40 rounded-2xl bg-neutral-900 animate-pulse" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="h-64 rounded-2xl bg-slate-900/60 animate-pulse" />
-            <div className="h-64 rounded-2xl bg-slate-900/60 animate-pulse" />
+            <div className="h-64 rounded-2xl bg-neutral-900 animate-pulse" />
+            <div className="h-64 rounded-2xl bg-neutral-900 animate-pulse" />
           </div>
         </main>
       </>
     );
   }
 
+  // Strict Monochrome Palette for category progression
   const categories = [
-    { key: "DOCUMENT", label: "Documents", color: "bg-blue-500", text: "text-blue-400" },
-    { key: "IMAGE", label: "Images", color: "bg-emerald-500", text: "text-emerald-400" },
-    { key: "VIDEO", label: "Videos", color: "bg-purple-500", text: "text-purple-400" },
-    { key: "AUDIO", label: "Audio", color: "bg-amber-500", text: "text-amber-400" },
-    { key: "ARCHIVE", label: "Archives", color: "bg-rose-500", text: "text-rose-400" },
-    { key: "OTHER", label: "Other", color: "bg-zinc-500", text: "text-zinc-400" },
+    { key: "DOCUMENT", label: "Documents", barColor: "bg-white", text: "text-neutral-100" },
+    { key: "IMAGE", label: "Images", barColor: "bg-neutral-300", text: "text-neutral-200" },
+    { key: "VIDEO", label: "Videos", barColor: "bg-neutral-400", text: "text-neutral-300" },
+    { key: "AUDIO", label: "Audio", barColor: "bg-neutral-500", text: "text-neutral-400" },
+    { key: "ARCHIVE", label: "Archives", barColor: "bg-neutral-600", text: "text-neutral-400" },
+    { key: "OTHER", label: "Other", barColor: "bg-neutral-700", text: "text-neutral-500" },
   ] as const;
 
   return (
     <>
-      <Header title="Vault Storage Analytics" />
+      <Header title="StorageVault Analytics" />
 
-      <main className="p-8 max-w-7xl mx-auto w-full space-y-8">
+      <main className="p-6 md:p-8 max-w-7xl mx-auto w-full space-y-8">
         {/* Banner with Clear Storage Label Notice */}
-        <div className="p-5 rounded-2xl bg-[#0f172a] border border-white/5 flex items-start gap-3 text-xs">
-          <AlertCircle className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-          <div className="text-slate-300">
+        <div className="p-5 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-start gap-3.5 text-xs">
+          <AlertCircle className="w-4 h-4 text-white shrink-0 mt-0.5" />
+          <div className="text-neutral-300 leading-relaxed">
             <span className="font-bold text-white">Indexed Storage Statistics: </span>
-            The metrics below reflect the files indexed and managed through your VAULT AI account.
-            Files are hosted in your personal Telegram Saved Messages. Telegram itself does not enforce
-            a strict quota on personal messages, allowing practically unlimited storage up to 2GB per file.
+            The metrics below reflect the files indexed and managed through your StorageVault account.
+            Files are hosted in your personal Telegram Saved Messages. Telegram does not enforce
+            an arbitrary quota on personal messages, allowing unlimited storage up to 2GB per file.
           </div>
         </div>
 
-        {/* Top 3 High Level KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="glass-card rounded-2xl p-6">
-            <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-              <span>Total Indexed Storage</span>
-              <HardDrive className="w-4 h-4 text-blue-400" />
+        {/* 3D Isometric Volume Visualizer & Top KPI row */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-5 rounded-2xl bg-neutral-900/60 border border-neutral-800 p-5 flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-bold text-white">Isometric Volume Matrix</h2>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-neutral-300">
+                DISTRIBUTION 3D
+              </span>
             </div>
-            <div className="text-3xl font-extrabold text-white">
-              {data?.formattedTotalSize || "0 Bytes"}
-            </div>
-            <div className="text-[11px] text-slate-400 mt-2">
-              Across all categories in Saved Messages
-            </div>
-          </div>
-
-          <div className="glass-card rounded-2xl p-6">
-            <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-              <span>Total Files Stored</span>
-              <FolderOpen className="w-4 h-4 text-purple-400" />
-            </div>
-            <div className="text-3xl font-extrabold text-white">
-              {data?.totalFiles ?? 0}
-            </div>
-            <div className="text-[11px] text-slate-400 mt-2">
-              Indexed in PostgreSQL metadata
+            <DataPillar3D />
+            <div className="flex items-center justify-between text-xs text-neutral-400 pt-2 border-t border-neutral-800/80 font-mono">
+              <span>Sovereignty: 100%</span>
+              <span>Quota: Unlimited</span>
             </div>
           </div>
 
-          <div className="glass-card rounded-2xl p-6">
-            <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-              <span>Recent Activity (7 Days)</span>
-              <Clock className="w-4 h-4 text-emerald-400" />
+          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="glass-card rounded-2xl p-5 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-neutral-400 text-xs mb-2">
+                <span>Total Indexed</span>
+                <HardDrive className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <div className="text-2xl font-extrabold text-white">
+                  {data?.formattedTotalSize || "0 Bytes"}
+                </div>
+                <div className="text-[11px] text-neutral-400 mt-2 font-mono">
+                  Saved Messages Storage
+                </div>
+              </div>
             </div>
-            <div className="text-3xl font-extrabold text-white">
-              {data?.recentUploadsCount ?? 0}
+
+            <div className="glass-card rounded-2xl p-5 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-neutral-400 text-xs mb-2">
+                <span>Total Files</span>
+                <FolderOpen className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <div className="text-2xl font-extrabold text-white">
+                  {data?.totalFiles ?? 0}
+                </div>
+                <div className="text-[11px] text-neutral-400 mt-2 font-mono">
+                  PostgreSQL Metadata Index
+                </div>
+              </div>
             </div>
-            <div className="text-[11px] text-slate-400 mt-2">
-              New files synced recently
+
+            <div className="glass-card rounded-2xl p-5 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-neutral-400 text-xs mb-2">
+                <span>Recent (7d)</span>
+                <Clock className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <div className="text-2xl font-extrabold text-white">
+                  {data?.recentUploadsCount ?? 0}
+                </div>
+                <div className="text-[11px] text-neutral-400 mt-2 font-mono">
+                  New files synced
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Breakdown by Category Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Card: File Count Distribution */}
-          <div className="glass-panel p-6 rounded-2xl border border-white/10 space-y-4">
+          <div className="glass-panel p-6 rounded-2xl border border-neutral-800 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-blue-400" />
+              <BarChart3 className="w-4 h-4 text-white" />
               <span>File Count by Category</span>
             </h3>
 
@@ -128,16 +150,16 @@ export default function AnalyticsPage() {
                 const percentage = Math.round((count / total) * 100);
 
                 return (
-                  <div key={cat.key} className="space-y-1 text-xs">
-                    <div className="flex justify-between text-slate-300">
+                  <div key={cat.key} className="space-y-1.5 text-xs">
+                    <div className="flex justify-between text-neutral-300 font-mono">
                       <span className={cat.text}>{cat.label}</span>
                       <span>
                         {count} files ({percentage}%)
                       </span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                    <div className="w-full h-1.5 rounded-full bg-neutral-800 overflow-hidden">
                       <div
-                        className={`h-full ${cat.color} rounded-full transition-all duration-500`}
+                        className={`h-full ${cat.barColor} rounded-full transition-all duration-500`}
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -148,9 +170,9 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Card: Storage Size Distribution */}
-          <div className="glass-panel p-6 rounded-2xl border border-white/10 space-y-4">
+          <div className="glass-panel p-6 rounded-2xl border border-neutral-800 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-purple-400" />
+              <TrendingUp className="w-4 h-4 text-white" />
               <span>Storage Size by Category</span>
             </h3>
 
@@ -161,16 +183,16 @@ export default function AnalyticsPage() {
                 const percentage = Math.round((bytes / total) * 100);
 
                 return (
-                  <div key={cat.key} className="space-y-1 text-xs">
-                    <div className="flex justify-between text-slate-300">
+                  <div key={cat.key} className="space-y-1.5 text-xs">
+                    <div className="flex justify-between text-neutral-300 font-mono">
                       <span className={cat.text}>{cat.label}</span>
                       <span>
                         {formatBytes(bytes)} ({percentage}%)
                       </span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                    <div className="w-full h-1.5 rounded-full bg-neutral-800 overflow-hidden">
                       <div
-                        className={`h-full ${cat.color} rounded-full transition-all duration-500`}
+                        className={`h-full ${cat.barColor} rounded-full transition-all duration-500`}
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -182,17 +204,17 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Largest Files Table */}
-        <div className="glass-panel p-6 rounded-2xl border border-white/10 space-y-4">
+        <div className="glass-panel p-6 rounded-2xl border border-neutral-800 space-y-4">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <HardDrive className="w-4 h-4 text-emerald-400" />
-            <span>Largest Files in Vault</span>
+            <HardDrive className="w-4 h-4 text-white" />
+            <span>Largest Files in StorageVault</span>
           </h3>
 
           {data?.largestFiles && data.largestFiles.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-white/10 text-slate-400 text-[11px] uppercase">
+                  <tr className="border-b border-neutral-800 text-neutral-400 text-[11px] uppercase font-mono">
                     <th className="py-2.5 px-3">Filename</th>
                     <th className="py-2.5 px-3">Category</th>
                     <th className="py-2.5 px-3">Size</th>
@@ -204,27 +226,27 @@ export default function AnalyticsPage() {
                   {data.largestFiles.map((file) => (
                     <tr
                       key={file.id}
-                      className="border-b border-white/5 hover:bg-white/5 transition"
+                      className="border-b border-neutral-850 hover:bg-neutral-900 transition"
                     >
                       <td className="py-2.5 px-3 font-medium text-white max-w-xs truncate">
                         {file.displayFilename}
                       </td>
                       <td className="py-2.5 px-3">
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10">
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-neutral-300 font-mono">
                           {file.category}
                         </span>
                       </td>
-                      <td className="py-2.5 px-3 font-mono text-slate-200">
+                      <td className="py-2.5 px-3 font-mono text-neutral-200">
                         {formatBytes(file.fileSizeBytes)}
                       </td>
-                      <td className="py-2.5 px-3 text-slate-400">
+                      <td className="py-2.5 px-3 text-neutral-400 font-mono">
                         {new Date(file.uploadedAt).toLocaleDateString()}
                       </td>
                       <td className="py-2.5 px-3 text-right">
                         <a
                           href={`/api/files/${file.id}/download`}
                           download={file.originalFilename}
-                          className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 font-semibold"
+                          className="inline-flex items-center gap-1 text-white hover:underline font-semibold"
                         >
                           <Download className="w-3.5 h-3.5" />
                           <span>Stream</span>
@@ -236,7 +258,7 @@ export default function AnalyticsPage() {
               </table>
             </div>
           ) : (
-            <p className="text-xs text-slate-400">No files uploaded yet.</p>
+            <p className="text-xs text-neutral-400">No files uploaded yet.</p>
           )}
         </div>
       </main>

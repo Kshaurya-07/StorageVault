@@ -4,7 +4,7 @@ import { executeAiSearch } from "@/lib/ai/aiSearchEngine";
 
 /**
  * POST /api/ai/search
- * Privacy-First AI Search Engine for VAULT AI.
+ * Privacy-First AI Search Engine for StorageVault.
  * Natural language queries e.g.:
  * - "Find my Java notes"
  * - "Show PDFs uploaded last week"

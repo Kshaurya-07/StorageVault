@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
+import Shield3DVault from "@/components/3d/Shield3DVault";
 import {
   Settings,
   User,
@@ -110,39 +111,61 @@ export default function SettingsPage() {
     <>
       <Header title="Account Settings" />
 
-      <main className="p-8 max-w-4xl mx-auto w-full space-y-8">
+      <main className="p-6 md:p-8 max-w-4xl mx-auto w-full space-y-8">
         {msg && (
           <div
             className={`p-4 rounded-2xl border flex items-center gap-2.5 text-xs ${
               msg.type === "success"
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
-                : "bg-rose-500/10 border-rose-500/30 text-rose-300"
+                ? "bg-neutral-900 border-neutral-700 text-neutral-200"
+                : "bg-neutral-900 border-neutral-700 text-neutral-300"
             }`}
           >
             {msg.type === "success" ? (
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-white" />
             ) : (
-              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <AlertTriangle className="w-4 h-4 shrink-0 text-white" />
             )}
             <span>{msg.text}</span>
           </div>
         )}
 
+        {/* 3D Security Posture Card */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-neutral-800 shadow-xl">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            <div className="md:col-span-8 space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-semibold">
+                <Shield className="w-3.5 h-3.5 text-neutral-400" />
+                <span>Cryptographic Key Management</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                Zero-Knowledge Vault Perimeter
+              </h2>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Your StorageVault session credentials and PostgreSQL metadata partitions are protected with authenticated AES-256-GCM ciphers.
+                Files are streamed directly into your Telegram account without persistent disk exposure on our host machines.
+              </p>
+            </div>
+            <div className="md:col-span-4 h-[160px] flex items-center justify-center">
+              <Shield3DVault className="w-full h-full" />
+            </div>
+          </div>
+        </div>
+
         {/* Profile Card */}
-        <div className="glass-panel rounded-3xl p-6 border border-white/10 space-y-4">
+        <div className="glass-panel rounded-3xl p-6 border border-neutral-800 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-700 text-white flex items-center justify-center">
               <User className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">Profile Details</h3>
-              <p className="text-xs text-slate-400">Your account identity</p>
+              <p className="text-xs text-neutral-400">Your account identity</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs">
-            <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
-              <span className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs font-mono">
+            <div className="p-3.5 rounded-xl bg-neutral-900 border border-neutral-800">
+              <span className="text-[10px] text-neutral-500 uppercase font-semibold block mb-1">
                 Full Name
               </span>
               <span className="text-white font-medium">
@@ -150,8 +173,8 @@ export default function SettingsPage() {
               </span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
-              <span className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">
+            <div className="p-3.5 rounded-xl bg-neutral-900 border border-neutral-800">
+              <span className="text-[10px] text-neutral-500 uppercase font-semibold block mb-1">
                 Email Address
               </span>
               <span className="text-white font-medium">{user?.email || "..."}</span>
@@ -160,15 +183,15 @@ export default function SettingsPage() {
         </div>
 
         {/* Telegram Connection Management Card */}
-        <div className="glass-panel rounded-3xl p-6 border border-white/10 space-y-4">
+        <div className="glass-panel rounded-3xl p-6 border border-neutral-800 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-700 text-white flex items-center justify-center">
                 <Send className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">Telegram Cloud Connection</h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-neutral-400">
                   {tgStatus.connected
                     ? `Linked to personal Telegram account (@${tgStatus.username || "Saved Messages"})`
                     : "No Telegram account currently linked"}
@@ -178,7 +201,7 @@ export default function SettingsPage() {
 
             <Link
               href="/connect-telegram"
-              className="px-4 py-2 rounded-xl bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/30 text-xs font-semibold transition"
+              className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 text-xs font-semibold transition"
             >
               {tgStatus.connected ? "Manage Connection" : "Connect Now"}
             </Link>
@@ -186,14 +209,14 @@ export default function SettingsPage() {
         </div>
 
         {/* Change Password Card */}
-        <div className="glass-panel rounded-3xl p-6 border border-white/10 space-y-4">
+        <div className="glass-panel rounded-3xl p-6 border border-neutral-800 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-700 text-white flex items-center justify-center">
               <KeyRound className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">Change Password</h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-neutral-400">
                 Update your vault authentication password
               </p>
             </div>
@@ -201,7 +224,7 @@ export default function SettingsPage() {
 
           <form onSubmit={handleUpdatePassword} className="space-y-4 max-w-md pt-2">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
                 Current Password
               </label>
               <input
@@ -209,12 +232,12 @@ export default function SettingsPage() {
                 placeholder="•••••••• (if previously set)"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full bg-[#11192e] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
                 New Password
               </label>
               <input
@@ -224,12 +247,12 @@ export default function SettingsPage() {
                 placeholder="•••••••• (min 8 characters)"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full bg-[#11192e] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
                 Confirm New Password
               </label>
               <input
@@ -239,44 +262,44 @@ export default function SettingsPage() {
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-[#11192e] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-500"
               />
             </div>
 
             <button
               type="submit"
               disabled={updatingPassword}
-              className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-2"
+              className="bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-semibold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-2 shadow-md"
             >
-              {updatingPassword && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              {updatingPassword && <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />}
               <span>Update Password</span>
             </button>
           </form>
         </div>
 
         {/* Danger Zone: Account Deletion */}
-        <div className="rounded-3xl p-6 bg-rose-950/20 border border-rose-500/20 space-y-3">
+        <div className="rounded-3xl p-6 bg-neutral-900/60 border border-neutral-800 space-y-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-neutral-800 border border-neutral-700 text-neutral-300 flex items-center justify-center">
               <Trash2 className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-rose-300">Danger Zone: Delete Account</h3>
-              <p className="text-xs text-slate-400">
+              <h3 className="text-sm font-bold text-white">Danger Zone: Delete Account</h3>
+              <p className="text-xs text-neutral-400">
                 Permanently purge your account, database records, and active sessions.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-2">
-            <p className="text-xs text-slate-400 max-w-lg">
-              Files already existing in your Telegram Saved Messages will remain in your
-              Telegram app, but all indexed metadata and sessions in VAULT AI will be wiped permanently.
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+            <p className="text-xs text-neutral-400 max-w-lg">
+              Files already existing in your Telegram Saved Messages will remain intact in your
+              Telegram app, but all indexed metadata and sessions in StorageVault will be wiped permanently.
             </p>
             <button
               onClick={handleDeleteAccount}
               disabled={deletingAccount}
-              className="bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition"
+              className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-semibold text-xs px-5 py-2.5 rounded-xl transition shrink-0"
             >
               {deletingAccount ? "Deleting..." : "Delete Account"}
             </button>

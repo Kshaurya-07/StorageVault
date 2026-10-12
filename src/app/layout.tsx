@@ -2,15 +2,16 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "VAULT AI - Cloud Storage Powered by Your Personal Telegram",
+  title: "StorageVault - Cloud Storage Powered by Your Personal Telegram",
   description:
-    "Premium, multi-user, zero-knowledge cloud storage using your own Telegram account's Saved Messages as private cloud storage. Fast, unlimited, encrypted, and AI-powered.",
+    "StorageVault turns your personal Telegram account's Saved Messages into an unlimited, zero-knowledge private cloud drive. Fast, encrypted, sovereign, and privacy-first AI search.",
   keywords: [
+    "storagevault",
     "cloud storage",
     "telegram saved messages",
     "encrypted storage",
-    "ai file manager",
-    "vault ai",
+    "zero knowledge",
+    "ai file search",
   ],
 };
 
@@ -21,7 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-[#090d16] text-slate-100 antialiased selection:bg-blue-600 selection:text-white">
+      <body className="min-h-screen bg-[#0a0a0a] text-neutral-100 antialiased selection:bg-neutral-800 selection:text-white">
         {children}
       </body>
     </html>

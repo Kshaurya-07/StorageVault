@@ -3,7 +3,7 @@ import { AiSearchResult, FileCategory, FileMetadata } from "../types";
 import { parseNaturalLanguageQuery, ParsedQuery } from "./queryParser";
 
 /**
- * Privacy-Strict AI Search Engine for VAULT AI.
+ * Privacy-Strict AI Search Engine for StorageVault.
  * Guarantees:
  * 1. Pre-query isolation: ONLY records owned by the authenticated userId are fetched.
  * 2. Deterministic filtering: Date, size, and category conditions are resolved via SQL indexes.

@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
       // Return ambiguous message to prevent email enumeration
       return NextResponse.json({
         success: true,
-        message: "If your email is registered in VAULT AI, you will receive password reset instructions.",
+        message: "If your email is registered in StorageVault, you will receive password reset instructions.",
       });
     }
 

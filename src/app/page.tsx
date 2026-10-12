@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import Vault3DCore from "@/components/3d/Vault3DCore";
 import {
   HardDrive,
   Send,
@@ -13,211 +14,303 @@ import {
   Cpu,
   Layers,
   Search,
-  Zap,
   KeyRound,
   FileCheck,
+  Server,
+  Zap,
+  EyeOff,
+  Database,
+  RefreshCw,
+  FolderLock,
 } from "lucide-react";
 
 export default function LandingPage() {
+  const timelineSteps = [
+    {
+      num: "01",
+      title: "Secure MTProto Connection",
+      tag: "Authentication",
+      desc: "Connect your personal Telegram account via official MTProto session protocols. Your session token is sealed with AES-256-GCM encryption in an isolated tenant partition with zero cross-user access.",
+      icon: KeyRound,
+    },
+    {
+      num: "02",
+      title: "Cryptographic Chunking",
+      tag: "Encryption",
+      desc: "Large files are split into deterministic binary chunks up to 2GB each. Each payload is encrypted with authenticated AES-256-GCM ciphers before transit, ensuring total zero-knowledge data privacy.",
+      icon: Lock,
+    },
+    {
+      num: "03",
+      title: "Personal Saved Messages Cloud",
+      tag: "Direct Transmission",
+      desc: "Payload chunks stream directly into your Telegram account's private 'Saved Messages' dialogue. StorageVault never pools files in shared bot channels or public groups—your storage remains 100% sovereign.",
+      icon: Send,
+    },
+    {
+      num: "04",
+      title: "Encrypted Metadata Indexing",
+      tag: "PostgreSQL Engine",
+      desc: "Only lightweight cryptographic hashes, mime-types, file sizes, and Telegram message IDs are indexed into PostgreSQL. Our servers maintain zero permanent disk storage of your actual file contents.",
+      icon: Database,
+    },
+    {
+      num: "05",
+      title: "Zero-Training AI File Discovery",
+      tag: "Privacy AI",
+      desc: "Query your entire file library in plain English: 'Find tax documents > 10MB from last November'. Queries are parsed into structured database filters with strictly zero model training on your data.",
+      icon: Sparkles,
+    },
+    {
+      num: "06",
+      title: "On-Demand Stream Decryption",
+      tag: "Instant Delivery",
+      desc: "Download or preview files instantaneously. Multi-part streams are piped directly from your Telegram Saved Messages to your browser through memory buffers with zero disk caching on the host server.",
+      icon: RefreshCw,
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#090d16] text-white selection:bg-blue-600">
+    <div className="min-h-screen bg-[#0a0a0a] text-neutral-100 selection:bg-neutral-800 selection:text-white">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-36 pb-24 overflow-hidden">
-        {/* Glow ambient background effects */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-gradient-to-tr from-blue-600/20 via-indigo-600/20 to-purple-600/10 blur-[130px] rounded-full pointer-events-none" />
+      <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden border-b border-neutral-800/60">
+        {/* Subtle ambient radial depth (monochrome) */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-white/[0.02] blur-[140px] rounded-full pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-8 animate-fade-in">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Next-Gen Decentralized Personal Cloud</span>
-          </div>
-
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight max-w-4xl mx-auto leading-[1.1] mb-6">
-            Your Personal Telegram as an{" "}
-            <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-              Unlimited AI Cloud Vault
-            </span>
-          </h1>
-
-          <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed font-normal">
-            VAULT AI turns your personal Telegram account&apos;s <strong>Saved Messages</strong> into a
-            secure, zero-knowledge cloud drive. Upload without permanent server storage, search with
-            private natural-language AI, and manage all your files with zero disk footprint on our servers.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto mb-16">
-            <Link
-              href="/register"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl shadow-xl shadow-blue-600/25 hover:scale-[1.02] active:scale-[0.98] transition-all text-sm"
-            >
-              Start Free Storage Vault
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/login"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-white/10 font-semibold px-7 py-3.5 rounded-xl transition text-sm"
-            >
-              Sign In to Vault
-            </Link>
-          </div>
-
-          {/* Architecture Visualization Card */}
-          <div className="max-w-4xl mx-auto rounded-3xl glass-panel p-6 sm:p-8 border border-white/10 shadow-2xl relative">
-            <div className="text-xs font-semibold text-blue-400 uppercase tracking-widest mb-4">
-              Multi-Tenant Zero-Knowledge Architecture
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-              {/* User A Flow */}
-              <div className="p-5 rounded-2xl bg-blue-950/20 border border-blue-500/20">
-                <div className="flex items-center gap-2 font-bold text-sm text-blue-300 mb-2">
-                  <KeyRound className="w-4 h-4" /> User A Sandbox
-                </div>
-                <div className="space-y-1.5 text-xs text-slate-300">
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                    <span>VAULT Account A (Encrypted Session)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                    <span>Telegram Account A (MTProto)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                    <span className="text-blue-300 font-semibold">Saved Messages A (Private Storage)</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400 pt-2 border-t border-white/5">
-                    User A strictly accesses only their own Telegram Saved Messages.
-                  </p>
-                </div>
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Hero Content */}
+            <div className="lg:col-span-7 text-left space-y-6">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-semibold">
+                <Sparkles className="w-3.5 h-3.5 text-neutral-400" />
+                <span>Personal Telegram Sovereign Cloud</span>
               </div>
 
-              {/* User B Flow */}
-              <div className="p-5 rounded-2xl bg-purple-950/20 border border-purple-500/20">
-                <div className="flex items-center gap-2 font-bold text-sm text-purple-300 mb-2">
-                  <KeyRound className="w-4 h-4" /> User B Sandbox
+              <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white leading-[1.08]">
+                Your Digital World. <br />
+                <span className="text-neutral-400">One Secure Vault.</span>
+              </h1>
+
+              <p className="text-base sm:text-lg text-neutral-400 max-w-xl leading-relaxed font-normal">
+                StorageVault transforms your personal Telegram account&apos;s <strong>Saved Messages</strong> into
+                an unlimited, zero-knowledge private cloud drive. Upload without host disk storage, search with
+                ephemeral privacy-first AI, and take absolute sovereignty over your files.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
+                <Link
+                  href="/register"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-black hover:bg-neutral-200 font-semibold px-8 py-3.5 rounded-xl shadow-xl shadow-black/40 hover:scale-[1.02] active:scale-[0.98] transition-all text-sm"
+                >
+                  Create StorageVault Free
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/login"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-800 font-semibold px-7 py-3.5 rounded-xl transition text-sm"
+                >
+                  Sign In to Vault
+                </Link>
+              </div>
+
+              {/* Trust Indicators */}
+              <div className="grid grid-cols-3 gap-4 pt-6 border-t border-neutral-900 text-xs text-neutral-400 font-mono">
+                <div>
+                  <div className="font-bold text-white text-sm">2GB</div>
+                  <div>Per File Limit</div>
                 </div>
-                <div className="space-y-1.5 text-xs text-slate-300">
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                    <span>VAULT Account B (Encrypted Session)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                    <span>Telegram Account B (MTProto)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                    <span className="text-purple-300 font-semibold">Saved Messages B (Private Storage)</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400 pt-2 border-t border-white/5">
-                    User B has zero cross-tenant access to User A files or queries.
-                  </p>
+                <div>
+                  <div className="font-bold text-white text-sm">AES-256</div>
+                  <div>GCM Authenticated</div>
                 </div>
+                <div>
+                  <div className="font-bold text-white text-sm">0 Disk</div>
+                  <div>Host Server Footprint</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Hero 3D Scene */}
+            <div className="lg:col-span-5 flex items-center justify-center">
+              <div className="w-full max-w-[420px] aspect-square rounded-3xl bg-neutral-950/80 border border-neutral-800/80 p-4 shadow-2xl relative">
+                <Vault3DCore className="w-full h-full" />
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Value Pillars Section */}
-      <section id="features" className="py-20 border-t border-white/5 bg-[#0b101e]/60">
+      {/* Multi-Tenant Zero-Knowledge Architecture Section */}
+      <section id="security" className="py-20 border-b border-neutral-800/60 bg-neutral-950/40">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-3">
+              True Tenant Isolation
+            </h2>
+            <h3 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mb-4">
+              Direct Account-to-Saved-Messages Architecture
+            </h3>
+            <p className="text-sm text-neutral-400 leading-relaxed">
+              Unlike insecure bot applications that dump all users&apos; files into a shared channel or centralized bucket,
+              StorageVault connects to your own Telegram account and operates solely inside your personal dialogue.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* User A Isolation Box */}
+            <div className="p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5 font-bold text-sm text-white">
+                  <KeyRound className="w-4 h-4 text-neutral-300" />
+                  <span>User A Isolated Sandbox</span>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-neutral-300 font-mono">
+                  PARTITION 01
+                </span>
+              </div>
+              <div className="space-y-2 text-xs text-neutral-300 font-mono">
+                <div className="p-2.5 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <span>StorageVault Account A (Argon2 / AES-256)</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <span>Telegram Account A (MTProto Client)</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center gap-2 text-white font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <span>Saved Messages A (Sovereign Cloud)</span>
+                </div>
+              </div>
+              <p className="text-[11px] text-neutral-400 leading-relaxed">
+                User A has cryptographic exclusivity. All queries are strictly scoped by <code>userId</code> in PostgreSQL.
+              </p>
+            </div>
+
+            {/* User B Isolation Box */}
+            <div className="p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5 font-bold text-sm text-white">
+                  <KeyRound className="w-4 h-4 text-neutral-300" />
+                  <span>User B Isolated Sandbox</span>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-neutral-300 font-mono">
+                  PARTITION 02
+                </span>
+              </div>
+              <div className="space-y-2 text-xs text-neutral-300 font-mono">
+                <div className="p-2.5 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <span>StorageVault Account B (Argon2 / AES-256)</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <span>Telegram Account B (MTProto Client)</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center gap-2 text-white font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <span>Saved Messages B (Sovereign Cloud)</span>
+                </div>
+              </div>
+              <p className="text-[11px] text-neutral-400 leading-relaxed">
+                User B cannot access, read, or discover User A data. Zero leakage across tenant partitions.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6-Step Workflow Timeline */}
+      <section id="timeline" className="py-24 border-b border-neutral-800/60">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mb-4">
-              Engineered for Sovereignty & Speed
+            <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-3">
+              End-to-End Mechanics
             </h2>
-            <p className="text-sm text-slate-400">
-              Why settle for expensive subscription tiers with storage quotas when Telegram provides
-              robust, global infrastructure right in your Saved Messages?
+            <h3 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mb-4">
+              How StorageVault Operates
+            </h3>
+            <p className="text-sm text-neutral-400 leading-relaxed">
+              A transparent, 6-stage lifecycle engineered for security, high throughput, and zero permanent server overhead.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {timelineSteps.map((step) => {
+              const Icon = step.icon;
+              return (
+                <div
+                  key={step.num}
+                  className="p-6 rounded-2xl bg-neutral-900/40 border border-neutral-800 hover:border-neutral-700 transition flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-10 h-10 rounded-xl bg-neutral-800 flex items-center justify-center border border-neutral-700 text-white">
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <span className="text-2xl font-mono font-bold text-neutral-600">
+                        {step.num}
+                      </span>
+                    </div>
+                    <div className="inline-block text-[10px] font-mono uppercase tracking-wider text-neutral-400 bg-neutral-800/80 px-2 py-0.5 rounded mb-2">
+                      {step.tag}
+                    </div>
+                    <h4 className="text-base font-bold text-white mb-2">{step.title}</h4>
+                    <p className="text-xs text-neutral-400 leading-relaxed">{step.desc}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Core Features Grid */}
+      <section id="features" className="py-20 border-b border-neutral-800/60 bg-neutral-950/30">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-3">
+              Performance Pillars
+            </h2>
+            <h3 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mb-4">
+              Engineered for Speed & Sovereignty
+            </h3>
+            <p className="text-sm text-neutral-400">
+              Stop paying recurring storage surcharges. Harness the resilience of Telegram Saved Messages.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="glass-card rounded-2xl p-6">
-              <div className="w-12 h-12 rounded-xl bg-blue-600/20 border border-blue-500/20 flex items-center justify-center mb-5 text-blue-400">
-                <Send className="w-6 h-6" />
+            <div className="p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800 hover:border-neutral-700 transition">
+              <div className="w-10 h-10 rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center mb-4 text-white">
+                <Send className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Personal Saved Messages</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Connect your personal Telegram account directly via MTProto. We do NOT use a shared bot
-                or channel. Every file lives directly in your personal Saved Messages chat.
+              <h4 className="text-base font-bold text-white mb-2">Saved Messages Storage</h4>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Connect your Telegram account via MTProto session keys. All files live inside your private Saved Messages chat. No bots, no shared channels.
               </p>
             </div>
 
-            {/* Feature 2 */}
-            <div className="glass-card rounded-2xl p-6">
-              <div className="w-12 h-12 rounded-xl bg-purple-600/20 border border-purple-500/20 flex items-center justify-center mb-5 text-purple-400">
-                <Sparkles className="w-6 h-6" />
+            <div className="p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800 hover:border-neutral-700 transition">
+              <div className="w-10 h-10 rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center mb-4 text-white">
+                <Sparkles className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Privacy-First AI Search</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Query your files naturally: &quot;Find Java notes from last week&quot; or &quot;Show videos &gt; 100MB&quot;.
-                Zero personal memory persistence, zero training on your documents, and 100% ephemeral prompts.
+              <h4 className="text-base font-bold text-white mb-2">Privacy-First AI Search</h4>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Search with natural language queries: &quot;Show PDF invoices over 5MB&quot; or &quot;Find React notes from Tuesday&quot;. Zero LLM training on your files.
               </p>
             </div>
 
-            {/* Feature 3 */}
-            <div className="glass-card rounded-2xl p-6">
-              <div className="w-12 h-12 rounded-xl bg-emerald-600/20 border border-emerald-500/20 flex items-center justify-center mb-5 text-emerald-400">
-                <Shield className="w-6 h-6" />
+            <div className="p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800 hover:border-neutral-700 transition">
+              <div className="w-10 h-10 rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center mb-4 text-white">
+                <EyeOff className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Zero Permanent Disk Footprint</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Files are streamed directly into your Telegram cloud during upload and streamed back on
-                download. Our servers only maintain indexed metadata, never keeping duplicate files on disk.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Onboarding Flow Section */}
-      <section id="how-it-works" className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-xl mx-auto mb-16">
-            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mb-4">
-              How VAULT AI Works
-            </h2>
-            <p className="text-sm text-slate-400">
-              Get up and running in under 60 seconds with your own Telegram account.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="p-6 rounded-2xl bg-[#0f172a] border border-white/5 relative">
-              <div className="text-3xl font-extrabold text-blue-500/40 mb-2">01</div>
-              <h4 className="text-sm font-bold text-white mb-1.5">Create Account</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Register with your email and password. Your account receives isolated PostgreSQL partitions.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-[#0f172a] border border-white/5 relative">
-              <div className="text-3xl font-extrabold text-blue-500/40 mb-2">02</div>
-              <h4 className="text-sm font-bold text-white mb-1.5">Link Telegram</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Authorize your Telegram account via official MTProto verification code. Your session is AES-256 encrypted.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-[#0f172a] border border-white/5 relative">
-              <div className="text-3xl font-extrabold text-blue-500/40 mb-2">03</div>
-              <h4 className="text-sm font-bold text-white mb-1.5">Drag & Drop Files</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Upload files up to 2GB each. They stream directly to your personal Saved Messages chat.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-[#0f172a] border border-white/5 relative">
-              <div className="text-3xl font-extrabold text-blue-500/40 mb-2">04</div>
-              <h4 className="text-sm font-bold text-white mb-1.5">AI Search & Stream</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Locate files instantaneously using AI natural language filters and stream downloads anytime.
+              <h4 className="text-base font-bold text-white mb-2">Zero Host Disk Storage</h4>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Uploads stream straight to Telegram; downloads stream straight to your device. The host server holds only encrypted metadata pointers in PostgreSQL.
               </p>
             </div>
           </div>
@@ -225,12 +318,14 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Footer */}
-      <footer className="border-t border-white/5 bg-[#070b14] py-12">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-slate-400">
-          <div className="flex items-center gap-2">
-            <HardDrive className="w-4 h-4 text-blue-400" />
-            <span className="font-semibold text-white">VAULT AI</span>
-            <span>&copy; {new Date().getFullYear()} All rights reserved.</span>
+      <footer className="border-t border-neutral-800 bg-[#070707] py-14">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-neutral-400">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center">
+              <HardDrive className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="font-bold text-sm text-white">StorageVault</span>
+            <span className="text-neutral-500">&copy; {new Date().getFullYear()} All rights reserved.</span>
           </div>
 
           <div className="flex items-center gap-6">
@@ -240,8 +335,8 @@ export default function LandingPage() {
             <Link href="/login" className="hover:text-white transition">
               Sign In
             </Link>
-            <Link href="/register" className="text-blue-400 hover:underline">
-              Create Vault Account
+            <Link href="/register" className="text-white hover:underline font-semibold">
+              Create StorageVault Account
             </Link>
           </div>
         </div>

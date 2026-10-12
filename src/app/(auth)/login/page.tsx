@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { HardDrive, Mail, Lock, ArrowRight, AlertCircle, Loader2 } from "lucide-react";
+import { Mail, Lock, ArrowRight, AlertCircle, Loader2 } from "lucide-react";
+import VaultEmblem3D from "@/components/3d/VaultEmblem3D";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,72 +42,70 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] flex items-center justify-center p-6 selection:bg-blue-600">
+    <div className="min-h-screen bg-[#0a0a0a] text-neutral-100 flex items-center justify-center p-6 selection:bg-neutral-800 selection:text-white">
       <div className="w-full max-w-md">
-        {/* Brand */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2.5 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-              <HardDrive className="w-5 h-5 text-white" />
-            </div>
+        {/* Brand with 3D Vault Emblem */}
+        <div className="text-center mb-8 flex flex-col items-center">
+          <Link href="/" className="inline-flex flex-col items-center gap-1 mb-2 group">
+            <VaultEmblem3D size={68} className="mb-2 group-hover:scale-105 transition-transform" />
             <span className="font-bold text-2xl tracking-tight text-white">
-              VAULT <span className="text-blue-400">AI</span>
+              Storage<span className="text-neutral-400 font-medium">Vault</span>
             </span>
           </Link>
-          <h2 className="text-lg font-bold text-white">Welcome Back</h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Sign in to access your personal Telegram-backed vault
+          <h2 className="text-base font-bold text-white">Sign In to Your Vault</h2>
+          <p className="text-xs text-neutral-400 mt-1">
+            Access your personal Telegram-backed sovereign cloud
           </p>
         </div>
 
         {/* Card */}
-        <div className="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl">
+        <div className="glass-panel p-8 rounded-3xl border border-neutral-800 shadow-2xl">
           {error && (
-            <div className="mb-6 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-2 text-rose-300 text-xs">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+            <div className="mb-6 p-3.5 rounded-xl bg-neutral-900 border border-neutral-700 flex items-center gap-2 text-neutral-200 text-xs">
+              <AlertCircle className="w-4 h-4 shrink-0 text-white" />
               <span>{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
                   required
                   placeholder="alex@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#11192e] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-500 transition"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-slate-300">
+                <label className="block text-xs font-semibold text-neutral-300">
                   Password
                 </label>
                 <Link
                   href="/forgot-password"
-                  className="text-[11px] text-blue-400 hover:underline"
+                  className="text-[11px] text-neutral-400 hover:text-white hover:underline transition"
                 >
                   Forgot password?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4 h-4 text-neutral-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="password"
                   required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#11192e] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-500 transition"
                 />
               </div>
             </div>
@@ -114,10 +113,10 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-600/25 transition text-xs"
+              className="w-full mt-2 flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-semibold py-3 rounded-xl shadow-md transition text-xs"
             >
               {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin text-black" />
               ) : (
                 <>
                   <span>Sign In</span>
@@ -127,10 +126,10 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-white/5 text-center text-xs text-slate-400">
+          <div className="mt-6 pt-6 border-t border-neutral-800 text-center text-xs text-neutral-400">
             Don&apos;t have an account yet?{" "}
-            <Link href="/register" className="text-blue-400 font-semibold hover:underline">
-              Create an account
+            <Link href="/register" className="text-white font-semibold hover:underline">
+              Create StorageVault account
             </Link>
           </div>
         </div>

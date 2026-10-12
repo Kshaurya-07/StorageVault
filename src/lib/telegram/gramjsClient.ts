@@ -168,7 +168,7 @@ export class GramJsTelegramService implements ITelegramService {
       // In Telegram MTProto, "me" routes directly to the user's personal Saved Messages
       const result: any = await client.sendFile("me", {
         file: customFile,
-        caption: `VAULT AI: ${fileName}`,
+        caption: `StorageVault: ${fileName}`,
         forceDocument: true,
         workers: 1,
       });

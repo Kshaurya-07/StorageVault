@@ -107,39 +107,39 @@ export function getCategoryBadgeColor(category: FileCategory): {
   switch (category) {
     case "DOCUMENT":
       return {
-        bg: "bg-blue-500/10",
-        text: "text-blue-400",
-        border: "border-blue-500/20",
+        bg: "bg-neutral-900",
+        text: "text-neutral-200",
+        border: "border-neutral-700",
       };
     case "IMAGE":
       return {
-        bg: "bg-emerald-500/10",
-        text: "text-emerald-400",
-        border: "border-emerald-500/20",
+        bg: "bg-neutral-900",
+        text: "text-neutral-300",
+        border: "border-neutral-800",
       };
     case "VIDEO":
       return {
-        bg: "bg-purple-500/10",
-        text: "text-purple-400",
-        border: "border-purple-500/20",
+        bg: "bg-neutral-900",
+        text: "text-neutral-300",
+        border: "border-neutral-800",
       };
     case "AUDIO":
       return {
-        bg: "bg-amber-500/10",
-        text: "text-amber-400",
-        border: "border-amber-500/20",
+        bg: "bg-neutral-900",
+        text: "text-neutral-400",
+        border: "border-neutral-800",
       };
     case "ARCHIVE":
       return {
-        bg: "bg-rose-500/10",
-        text: "text-rose-400",
-        border: "border-rose-500/20",
+        bg: "bg-neutral-900",
+        text: "text-neutral-300",
+        border: "border-neutral-800",
       };
     default:
       return {
-        bg: "bg-zinc-500/10",
-        text: "text-zinc-400",
-        border: "border-zinc-500/20",
+        bg: "bg-neutral-900",
+        text: "text-neutral-400",
+        border: "border-neutral-800",
       };
   }
 }
