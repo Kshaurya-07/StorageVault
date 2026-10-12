@@ -1,6 +1,7 @@
-import { TelegramClient, Api } from "telegram";
-import { StringSession } from "telegram/sessions";
-import { CustomFile } from "telegram/client/uploads";
+import { TelegramClient, Api, sessions, client as tgClient } from "telegram";
+type StringSessionInstance = InstanceType<typeof sessions.StringSession>;
+const { StringSession } = sessions;
+const { CustomFile } = tgClient.uploads;
 import {
   ITelegramService,
   SendCodeResult,
@@ -20,7 +21,7 @@ export class GramJsTelegramService implements ITelegramService {
   // Ephemeral in-memory client instances during authentication flow
   private static pendingClients: Map<
     string,
-    { client: TelegramClient; session: StringSession }
+    { client: TelegramClient; session: StringSessionInstance }
   > = new Map();
 
   constructor(apiId: number, apiHash: string) {
@@ -30,7 +31,7 @@ export class GramJsTelegramService implements ITelegramService {
 
   private async createClient(sessionString: string = ""): Promise<{
     client: TelegramClient;
-    session: StringSession;
+    session: StringSessionInstance;
   }> {
     const session = new StringSession(sessionString);
     const client = new TelegramClient(session, this.apiId, this.apiHash, {

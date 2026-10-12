@@ -5,7 +5,7 @@
   "description": "VAULT AI - Premium Cloud Storage Platform Powered by Personal Telegram Saved Messages",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest --runInBand",

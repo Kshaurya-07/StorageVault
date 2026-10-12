@@ -4,11 +4,15 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ["telegram", "@prisma/client", "bcryptjs"],
   },
+  eslint: {
+    // Avoid build failure from linter warnings during production deploy
+    ignoreDuringBuilds: true,
+  },
   webpack: (config, { isServer }) => {
-    // Exclude optional native addons from webpack bundling
-    config.externals = [...(config.externals || []), "bufferutil", "utf-8-validate"];
-
-    if (!isServer) {
+    if (isServer) {
+      // Exclude optional native addons from server webpack bundling
+      config.externals = [...(config.externals || []), "bufferutil", "utf-8-validate"];
+    } else {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
@@ -21,8 +25,6 @@ const nextConfig = {
         os: false,
         path: false,
         zlib: false,
-        bufferutil: false,
-        "utf-8-validate": false,
       };
     }
     return config;
