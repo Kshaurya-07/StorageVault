@@ -1,3 +1,9 @@
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Prevent Next.js from bundling server-only MTProto & DB libraries with webpack
@@ -5,12 +11,16 @@ const nextConfig = {
     serverComponentsExternalPackages: ["telegram", "@prisma/client", "bcryptjs"],
   },
   eslint: {
-    // Avoid build failure from linter warnings during production deploy
     ignoreDuringBuilds: true,
   },
   webpack: (config, { isServer }) => {
+    // Explicitly guarantee @ alias resolution across all operating systems
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@": path.resolve(__dirname, "src"),
+    };
+
     if (isServer) {
-      // Exclude optional native addons from server webpack bundling
       config.externals = [...(config.externals || []), "bufferutil", "utf-8-validate"];
     } else {
       config.resolve.fallback = {
