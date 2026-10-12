@@ -29,6 +29,7 @@ The StorageVault (VAULT AI) codebase implements a private cloud storage SaaS pla
 | **C1** | Security / Auth | **CRITICAL** | `/api/auth/forgot-password` | **FIXED** |
 | **H1** | Build / Webpack | **HIGH** | `tsconfig.json`, `next.config.mjs` | **FIXED** |
 | **H2** | Database / Prisma | **HIGH** | `prisma/schema.prisma`, `.env` | **FIXED** |
+| **H3** | Build / CSS | **HIGH** | `package.json`, `render.yaml` | **FIXED** |
 | **M1** | Media / Streaming | **MEDIUM** | `/api/files/[id]/download`, `FilePreviewModal` | **FIXED** |
 | **M2** | Memory / Runtime | **MEDIUM** | `FileUploadModal.tsx` | **FIXED** |
 | **M3** | UI / Responsive | **MEDIUM** | `layout.tsx`, `Sidebar.tsx`, `Header.tsx` | **FIXED** |
@@ -63,6 +64,14 @@ The StorageVault (VAULT AI) codebase implements a private cloud storage SaaS pla
   1. Updated `.env` default `DATABASE_URL` to PostgreSQL format (`postgresql://postgres:postgres@localhost:5432/vault_ai?schema=public`).
   2. Created an automated cross-platform test runner (`scripts/test-runner.js`) and Jest setup (`tests/setup.ts`) that runs tests in an isolated SQLite environment and restores the production PostgreSQL client immediately upon test completion.
   3. `prisma validate` and `npm test` now both succeed without manual schema toggling.
+
+### [HIGH] H3 — Missing Tailwind CSS Package in Production Build (`Error: Cannot find module 'tailwindcss'`)
+* **Location:** `package.json`, `package-lock.json`, `render.yaml`
+* **Root Cause:** `tailwindcss`, `postcss`, `autoprefixer`, and `typescript` were declared in `"devDependencies"`. When building on Render with `NODE_ENV=production`, `npm install` defaults to production mode (`--omit=dev`), skipping `devDependencies`. As a result, PostCSS failed to find `tailwindcss` when compiling `src/app/globals.css`.
+* **Fix Implemented:**
+  1. Moved build-time dependencies (`tailwindcss`, `postcss`, `autoprefixer`, `typescript`, `@types/node`, `@types/react`, `@types/react-dom`) into `"dependencies"` in `package.json`.
+  2. Added `--include=dev` to `buildCommand` in `render.yaml` (`npm install --include=dev && npx prisma generate --schema=prisma/schema.prisma && npm run build`).
+  3. Ran `npm install` to update `package-lock.json`. Local production build and type checking verified successfully.
 
 ### [MEDIUM] M1 — Content-Disposition Blocking File Previews
 * **Location:** `src/app/api/files/[id]/download/route.ts` & `src/components/FilePreviewModal.tsx`
