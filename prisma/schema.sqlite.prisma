@@ -1,0 +1,101 @@
+// SQLite Schema for Local Testing and Zero-Dependency Development
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String        @id @default(uuid())
+  email         String        @unique
+  passwordHash  String        @map("password_hash")
+  name          String?
+  accountStatus String        @default("ACTIVE") @map("account_status")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  telegramConnection TelegramConnection?
+  files              File[]
+  fileTags           FileTag[]
+  favorites          Favorite[]
+
+  @@map("users")
+}
+
+model TelegramConnection {
+  id                         String    @id @default(uuid())
+  userId                     String    @unique @map("user_id")
+  telegramUserId             String?   @map("telegram_user_id")
+  telegramUsername           String?   @map("telegram_username")
+  telegramFirstName          String?   @map("telegram_first_name")
+  encryptedSessionReference  String?   @map("encrypted_session_reference")
+  phoneNumber                String?   @map("phone_number")
+  phoneCodeHash              String?   @map("phone_code_hash")
+  connectionStatus           String    @default("DISCONNECTED") @map("connection_status")
+  connectedAt                DateTime? @map("connected_at")
+  createdAt                  DateTime  @default(now()) @map("created_at")
+  updatedAt                  DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("telegram_connections")
+}
+
+model File {
+  id                    String   @id @default(uuid())
+  ownerUserId           String   @map("owner_user_id")
+  telegramMessageId     Int?     @map("telegram_message_id")
+  telegramPeerReference String   @default("me") @map("telegram_peer_reference")
+  telegramFileReference String?  @map("telegram_file_reference")
+  originalFilename      String   @map("original_filename")
+  displayFilename       String   @map("display_filename")
+  mimeType              String   @map("mime_type")
+  fileSizeBytes         Int      @map("file_size_bytes")
+  category              String   @default("OTHER")
+  uploadStatus          String   @default("PENDING") @map("upload_status")
+  isFavorite            Boolean  @default(false) @map("is_favorite")
+  uploadedAt            DateTime @default(now()) @map("uploaded_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  owner     User       @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  tags      FileTag[]
+  favorites Favorite[]
+
+  @@index([ownerUserId, category])
+  @@index([ownerUserId, uploadedAt])
+  @@index([ownerUserId, isFavorite])
+  @@index([ownerUserId, displayFilename])
+  @@map("files")
+}
+
+model FileTag {
+  id          String   @id @default(uuid())
+  ownerUserId String   @map("owner_user_id")
+  fileId      String   @map("file_id")
+  tag         String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  owner User @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  file  File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@unique([fileId, tag])
+  @@index([ownerUserId, tag])
+  @@map("file_tags")
+}
+
+model Favorite {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  fileId    String   @map("file_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, fileId])
+  @@index([userId])
+  @@map("favorites")
+}
