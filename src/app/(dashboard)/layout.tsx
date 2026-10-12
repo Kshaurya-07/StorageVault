@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
+import { SidebarProvider } from "@/components/SidebarContext";
 
 export default function DashboardLayout({
   children,
@@ -8,14 +9,16 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 flex">
-      {/* Fixed Left Sidebar */}
-      <Sidebar />
+    <SidebarProvider>
+      <div className="min-h-screen bg-[#090d16] text-slate-100 flex relative overflow-x-hidden">
+        {/* Responsive Left Sidebar */}
+        <Sidebar />
 
-      {/* Main Content Area */}
-      <div className="flex-1 ml-64 flex flex-col min-h-screen">
-        {children}
+        {/* Main Content Area */}
+        <div className="flex-1 lg:ml-64 ml-0 flex flex-col min-h-screen w-full min-w-0 transition-all">
+          {children}
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

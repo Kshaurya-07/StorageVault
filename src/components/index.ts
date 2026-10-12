@@ -8,3 +8,4 @@ export { default as Navbar } from "./Navbar";
 export { default as Sidebar } from "./Sidebar";
 export { default as EmptyState } from "./EmptyState";
 export { default as LoadingSkeleton, FileGridSkeleton, FileTableSkeleton } from "./LoadingSkeleton";
+export { SidebarProvider, useSidebar } from "./SidebarContext";

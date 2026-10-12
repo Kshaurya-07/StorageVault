@@ -30,6 +30,7 @@ export default function FilePreviewModal({
   if (!file) return null;
 
   const downloadUrl = `/api/files/${file.id}/download`;
+  const inlineUrl = `${downloadUrl}?inline=true`;
   const badgeColors = getCategoryBadgeColor(file.category);
 
   return (
@@ -86,7 +87,7 @@ export default function FilePreviewModal({
           {file.category === "IMAGE" ? (
             <div className="max-h-[50vh] flex items-center justify-center overflow-hidden rounded-xl">
               <img
-                src={downloadUrl}
+                src={inlineUrl}
                 alt={file.displayFilename}
                 className="max-h-[50vh] object-contain rounded-xl shadow-lg"
               />
@@ -99,7 +100,7 @@ export default function FilePreviewModal({
               <h4 className="text-sm font-semibold text-white mb-4">
                 {file.displayFilename}
               </h4>
-              <audio controls className="w-full" src={downloadUrl}>
+              <audio controls className="w-full" src={inlineUrl}>
                 Your browser does not support audio playback.
               </audio>
             </div>
@@ -108,7 +109,7 @@ export default function FilePreviewModal({
               <video
                 controls
                 className="max-h-[50vh] w-full rounded-xl shadow-lg border border-white/10"
-                src={downloadUrl}
+                src={inlineUrl}
               >
                 Your browser does not support video playback.
               </video>

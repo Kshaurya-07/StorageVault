@@ -64,11 +64,16 @@ export async function GET(
     });
 
     // 5. Stream securely to the user's browser
+    const isInline = req.nextUrl.searchParams.get("inline") === "true";
+    const dispositionType = isInline ? "inline" : "attachment";
+    const safeAscii = file.originalFilename.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const encodedFilename = encodeURIComponent(file.originalFilename);
+
     const headers = new Headers();
     headers.set("Content-Type", file.mimeType || result.mimeType || "application/octet-stream");
     headers.set(
       "Content-Disposition",
-      `attachment; filename="${encodeURIComponent(file.originalFilename)}"`
+      `${dispositionType}; filename="${safeAscii}"; filename*=UTF-8''${encodedFilename}`
     );
     headers.set("Content-Length", (result.size || result.buffer.length).toString());
     headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");

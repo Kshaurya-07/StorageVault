@@ -11,8 +11,10 @@ import {
   ShieldCheck,
   CheckCircle2,
   AlertCircle,
+  Menu,
 } from "lucide-react";
 import FileUploadModal from "./FileUploadModal";
+import { useSidebar } from "./SidebarContext";
 
 export default function Header({
   onSearch,
@@ -24,6 +26,7 @@ export default function Header({
   title?: string;
 }) {
   const router = useRouter();
+  const { toggle } = useSidebar();
   const [searchVal, setSearchVal] = useState("");
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [user, setUser] = useState<{ name?: string; email: string } | null>(null);
@@ -56,8 +59,15 @@ export default function Header({
   return (
     <>
       <header className="h-16 border-b border-white/5 bg-[#090d16]/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-6">
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg font-bold text-white capitalize">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggle}
+            className="lg:hidden p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/5 transition"
+            aria-label="Toggle navigation menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <h1 className="text-lg font-bold text-white capitalize truncate">
             {title || "Vault Dashboard"}
           </h1>
         </div>

@@ -20,12 +20,15 @@ import {
   Shield,
   LogOut,
   ChevronRight,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSidebar } from "./SidebarContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { isOpen, close } = useSidebar();
   const [tgStatus, setTgStatus] = useState<{
     connected: boolean;
     status: string;
@@ -69,23 +72,48 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-[#0c1222] border-r border-white/5 flex flex-col h-screen fixed left-0 top-0 z-40 select-none">
-      {/* Brand Header */}
-      <div className="h-16 px-5 border-b border-white/5 flex items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-md shadow-blue-500/20">
-            <HardDrive className="w-4 h-4 text-white" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-base tracking-tight text-white flex items-center gap-1">
-              VAULT <span className="text-blue-400 font-extrabold">AI</span>
-            </span>
-            <span className="text-[9px] text-slate-400 tracking-wider uppercase font-semibold">
-              Telegram Storage
-            </span>
-          </div>
-        </Link>
-      </div>
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div
+          onClick={close}
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-30 lg:hidden animate-fade-in"
+        />
+      )}
+
+      <aside
+        className={`w-64 bg-[#0c1222] border-r border-white/5 flex flex-col h-screen fixed left-0 top-0 z-40 select-none transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+        }`}
+      >
+        {/* Brand Header */}
+        <div className="h-16 px-5 border-b border-white/5 flex items-center justify-between">
+          <Link
+            href="/dashboard"
+            onClick={close}
+            className="flex items-center gap-2.5"
+          >
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-md shadow-blue-500/20">
+              <HardDrive className="w-4 h-4 text-white" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-base tracking-tight text-white flex items-center gap-1">
+                VAULT <span className="text-blue-400 font-extrabold">AI</span>
+              </span>
+              <span className="text-[9px] text-slate-400 tracking-wider uppercase font-semibold">
+                Telegram Storage
+              </span>
+            </div>
+          </Link>
+
+          <button
+            onClick={close}
+            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition"
+            title="Close menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
       {/* Navigation Scroll Area */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
@@ -102,6 +130,7 @@ export default function Sidebar() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={close}
                   className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                     active
                       ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25 font-semibold"
@@ -140,6 +169,7 @@ export default function Sidebar() {
                 <Link
                   key={cat.href}
                   href={cat.href}
+                  onClick={close}
                   className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                     active
                       ? "bg-white/10 text-white font-semibold border border-white/10"
@@ -178,6 +208,7 @@ export default function Sidebar() {
 
           <Link
             href="/connect-telegram"
+            onClick={close}
             className="w-full flex items-center justify-center gap-1.5 text-xs font-medium py-1.5 px-3 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/30 transition"
           >
             <span>{tgStatus.connected ? "Connection Status" : "Connect Telegram"}</span>
@@ -190,6 +221,7 @@ export default function Sidebar() {
       <div className="p-3 border-t border-white/5 space-y-1">
         <Link
           href="/privacy"
+          onClick={close}
           className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition ${
             pathname === "/privacy" ? "bg-white/10 text-white" : "text-slate-400 hover:text-white hover:bg-white/5"
           }`}
@@ -199,6 +231,7 @@ export default function Sidebar() {
         </Link>
         <Link
           href="/settings"
+          onClick={close}
           className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition ${
             pathname === "/settings" ? "bg-white/10 text-white" : "text-slate-400 hover:text-white hover:bg-white/5"
           }`}
@@ -215,5 +248,6 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }

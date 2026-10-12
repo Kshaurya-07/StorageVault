@@ -93,9 +93,10 @@ export default function FileUploadModal({
         formData.append("tags", tags.trim());
       }
 
+      let progressTimer: NodeJS.Timeout | null = null;
       try {
         // Progress simulation for user feedback
-        const interval = setInterval(() => {
+        progressTimer = setInterval(() => {
           setQueue((prev) =>
             prev.map((item, idx) =>
               idx === i && item.progress < 85
@@ -110,7 +111,7 @@ export default function FileUploadModal({
           body: formData,
         });
 
-        clearInterval(interval);
+        if (progressTimer) clearInterval(progressTimer);
         const data = await res.json();
 
         if (res.ok && data.success) {
@@ -138,6 +139,7 @@ export default function FileUploadModal({
           );
         }
       } catch (err: any) {
+        if (progressTimer) clearInterval(progressTimer);
         setQueue((prev) =>
           prev.map((item, idx) =>
             idx === i

@@ -28,6 +28,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [updatingPassword, setUpdatingPassword] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -52,7 +53,7 @@ export default function SettingsPage() {
     e.preventDefault();
     setMsg(null);
     if (newPassword.length < 8) {
-      setMsg({ type: "error", text: "Password must be at least 8 characters long." });
+      setMsg({ type: "error", text: "New password must be at least 8 characters long." });
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -62,14 +63,15 @@ export default function SettingsPage() {
 
     setUpdatingPassword(true);
     try {
-      const res = await fetch("/api/auth/forgot-password", {
+      const res = await fetch("/api/auth/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user?.email, newPassword }),
+        body: JSON.stringify({ currentPassword: currentPassword || undefined, newPassword }),
       });
       const d = await res.json();
       if (res.ok) {
         setMsg({ type: "success", text: "Password updated successfully." });
+        setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
       } else {
@@ -198,6 +200,19 @@ export default function SettingsPage() {
           </div>
 
           <form onSubmit={handleUpdatePassword} className="space-y-4 max-w-md pt-2">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                Current Password
+              </label>
+              <input
+                type="password"
+                placeholder="•••••••• (if previously set)"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full bg-[#11192e] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                 New Password

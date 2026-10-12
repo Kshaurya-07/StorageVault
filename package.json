@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "prisma generate --schema=prisma/schema.sqlite.prisma && jest --runInBand",
+    "test": "node scripts/test-runner.js",
     "test:watch": "jest --watch",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
