@@ -25,6 +25,12 @@ const config: Config = {
           900: "#171717",
           950: "#0a0a0a",
         },
+        // Non-standard intermediate neutrals used across the UI.
+        // Defined here so neutral-750/850 resolve to real classes.
+        neutral: {
+          750: "#2e2e2e",
+          850: "#1c1c1c",
+        },
         charcoal: {
           DEFAULT: "#121212",
           surface: "#171717",
@@ -43,6 +49,13 @@ const config: Config = {
       },
       animation: {
         "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "fade-in": "fade-in 0.25s ease-out",
+      },
+      keyframes: {
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
       },
     },
   },

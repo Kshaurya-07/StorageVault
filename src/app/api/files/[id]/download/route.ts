@@ -64,19 +64,34 @@ export async function GET(
     });
 
     // 5. Stream securely to the user's browser
-    const isInline = req.nextUrl.searchParams.get("inline") === "true";
+    // Inline preview is only allowed for safe, directly renderable media types.
+    // Everything else (HTML, SVG, scripts, executables, …) is forced to
+    // download as an attachment so a malicious upload can never execute
+    // in the vault's origin.
+    const INLINE_MIME_ALLOWLIST: RegExp[] = [
+      /^image\/(png|jpe?g|gif|webp|bmp)$/i,
+      /^audio\//i,
+      /^video\//i,
+    ];
+    const servedMime =
+      file.mimeType || result.mimeType || "application/octet-stream";
+    const requestedInline = req.nextUrl.searchParams.get("inline") === "true";
+    const isInline =
+      requestedInline && INLINE_MIME_ALLOWLIST.some((re) => re.test(servedMime));
     const dispositionType = isInline ? "inline" : "attachment";
     const safeAscii = file.originalFilename.replace(/[^a-zA-Z0-9._-]/g, "_");
     const encodedFilename = encodeURIComponent(file.originalFilename);
 
     const headers = new Headers();
-    headers.set("Content-Type", file.mimeType || result.mimeType || "application/octet-stream");
+    headers.set("Content-Type", servedMime);
     headers.set(
       "Content-Disposition",
       `${dispositionType}; filename="${safeAscii}"; filename*=UTF-8''${encodedFilename}`
     );
     headers.set("Content-Length", (result.size || result.buffer.length).toString());
     headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+    // Defense-in-depth: never let the browser sniff this response as HTML/JS.
+    headers.set("X-Content-Type-Options", "nosniff");
 
     return new NextResponse(new Uint8Array(result.buffer), {
       status: 200,
@@ -84,8 +99,9 @@ export async function GET(
     });
   } catch (error: any) {
     console.error("File download error:", error);
+    // Generic message: raw Telegram/crypto errors can leak internals.
     return NextResponse.json(
-      { error: error.message || "Failed to download file from Telegram." },
+      { error: "Failed to download file from Telegram." },
       { status: 500 }
     );
   }

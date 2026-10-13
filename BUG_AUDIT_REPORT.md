@@ -233,7 +233,7 @@ All 30 static and dynamic routes compiled without webpack or module errors.
 
 ### Telegram MTProto Integration
 * **Architecture:** User-scoped MTProto connection via `GramJsTelegramService` (live) and `MockTelegramService` (evaluation/testing).
-* **Credentials:** Configured with API ID `36207093` and provided hash.
+* **Credentials:** Configured via `TELEGRAM_API_ID` / `TELEGRAM_API_HASH` environment variables (values redacted from this report).
 * **Storage Location:** Personal `Saved Messages` (`me` peer).
 * **Data Protection:** String sessions are encrypted via AES-256-GCM (`crypto.ts`) prior to database storage. No plain credentials or session tokens are exposed in API responses or logs.
 
@@ -258,8 +258,8 @@ To deploy these updates to Render:
    * `DATABASE_URL`: Internal Connection String from your Render PostgreSQL database.
    * `JWT_SECRET`: Minimum 32-character secret string.
    * `ENCRYPTION_KEY`: 64-character hex key for AES-256-GCM.
-   * `TELEGRAM_API_ID`: `36207093`
-   * `TELEGRAM_API_HASH`: `23b5f9775a3522f2bd9a09d088445909`
+   * `TELEGRAM_API_ID`: `[REDACTED — leaked value must be rotated at my.telegram.org]`
+   * `TELEGRAM_API_HASH`: `[REDACTED — leaked value must be rotated at my.telegram.org]`
    * `TELEGRAM_MODE`: `real`
 4. **Trigger Deployment:**
    * Click **Manual Deploy** &rarr; **Clear build cache & deploy**.

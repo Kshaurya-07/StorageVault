@@ -30,11 +30,9 @@ export default function ConnectTelegramPage() {
     telegramFirstName?: string;
     phoneNumber?: string;
     connectedAt?: string;
-    mode: "real" | "mock";
   }>({
     connected: false,
     status: "DISCONNECTED",
-    mode: "mock",
   });
 
   // Flow steps: "phone" | "code" | "2fa" | "connected"
@@ -202,7 +200,7 @@ export default function ConnectTelegramPage() {
                   Personal Saved Messages Integration
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700">
-                  MTProto Layer ({status.mode.toUpperCase()})
+                  MTProto Layer
                 </span>
               </div>
               <p className="text-xs text-neutral-400 leading-relaxed">

@@ -3,12 +3,31 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 import { UserSession } from "./types";
+import prisma from "./db";
 
 const COOKIE_NAME = "vault_session";
 const JWT_EXPIRES_IN = "7d";
 
-function getJwtSecret(): Uint8Array {
-  const secret = process.env.JWT_SECRET || "vault-ai-default-jwt-secret-do-not-use-in-prod";
+/**
+ * Returns the JWT signing secret.
+ * FAILS CLOSED in production: the app refuses to sign/verify tokens when
+ * JWT_SECRET is missing or too short, instead of silently falling back to a
+ * publicly known default (which would allow universal token forgery).
+ */
+export function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "JWT_SECRET is not set. Refusing to start authentication in production without a secret."
+      );
+    }
+    // Dev/test only: clearly marked insecure default.
+    return new TextEncoder().encode("dev-only-insecure-jwt-secret-do-not-deploy");
+  }
+  if (secret.length < 32) {
+    throw new Error("JWT_SECRET must be at least 32 characters long.");
+  }
   return new TextEncoder().encode(secret);
 }
 
@@ -32,6 +51,8 @@ export async function verifyPassword(
 
 /**
  * Signs a JWT token containing user identity.
+ * Embeds the user's tokenVersion so password changes/resets instantly
+ * invalidate previously issued tokens (see getCurrentUser).
  */
 export async function signSessionToken(session: UserSession): Promise<string> {
   const secret = getJwtSecret();
@@ -39,6 +60,7 @@ export async function signSessionToken(session: UserSession): Promise<string> {
     userId: session.userId,
     email: session.email,
     name: session.name || null,
+    tokenVersion: session.tokenVersion ?? 0,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -62,6 +84,8 @@ export async function verifySessionToken(
       userId: payload.userId as string,
       email: payload.email as string,
       name: (payload.name as string) || null,
+      tokenVersion:
+        typeof payload.tokenVersion === "number" ? payload.tokenVersion : 0,
     };
   } catch {
     return null;
@@ -71,6 +95,10 @@ export async function verifySessionToken(
 /**
  * Extracts session from Next.js server context (cookies or Authorization header).
  * Strictly server-side: never trusts client-supplied owner ID.
+ *
+ * Additionally re-validates the session against the database on every call:
+ * - rejects tokens for DELETED/SUSPENDED accounts (accountStatus check)
+ * - rejects tokens whose tokenVersion no longer matches (password changed/reset)
  */
 export async function getCurrentUser(
   req?: NextRequest
@@ -100,7 +128,25 @@ export async function getCurrentUser(
   }
 
   if (!token) return null;
-  return verifySessionToken(token);
+  const session = await verifySessionToken(token);
+  if (!session) return null;
+
+  // Re-validate against the database: status + token version.
+  // This is what makes logout/password-change/suspension actually take effect.
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.userId },
+      select: { id: true, accountStatus: true, tokenVersion: true },
+    });
+    if (!user) return null;
+    if ((user.accountStatus as string) !== "ACTIVE") return null;
+    if (user.tokenVersion !== (session.tokenVersion ?? 0)) return null;
+  } catch {
+    // Fail closed: if we cannot validate the session, deny access.
+    return null;
+  }
+
+  return session;
 }
 
 export function getCookieSettings() {

@@ -6,11 +6,34 @@ import { decryptData } from "@/lib/crypto";
 import { detectCategory } from "@/lib/fileCategories";
 import { FileCategory } from "@/lib/types";
 
-// Maximum upload size: 2GB (Telegram limit)
-const MAX_FILE_SIZE = parseInt(
-  process.env.MAX_FILE_SIZE_BYTES || "2097152000",
+// Maximum upload size: 2GB (Telegram limit).
+// Guard against misconfiguration: a non-numeric env value would make
+// parseInt return NaN, and `size > NaN` is always false (limit silently off).
+const DEFAULT_MAX_FILE_SIZE = 2097152000;
+const _parsedMaxSize = parseInt(
+  process.env.MAX_FILE_SIZE_BYTES || String(DEFAULT_MAX_FILE_SIZE),
   10
 );
+const MAX_FILE_SIZE =
+  Number.isFinite(_parsedMaxSize) && _parsedMaxSize > 0
+    ? _parsedMaxSize
+    : DEFAULT_MAX_FILE_SIZE;
+
+// Tag limits: prevent DB-write amplification via unbounded tag lists.
+const MAX_TAGS_PER_FILE = 20;
+const MAX_TAG_LENGTH = 50;
+
+/** Parse a pagination param defensively: falls back to `def` on garbage input. */
+function parseBoundedInt(
+  raw: string | null,
+  def: number,
+  min: number,
+  max: number
+): number {
+  const n = parseInt(raw ?? "", 10);
+  if (!Number.isFinite(n)) return def;
+  return Math.min(Math.max(n, min), max);
+}
 
 export const dynamic = "force-dynamic";
 
@@ -35,8 +58,8 @@ export async function GET(req: NextRequest) {
     const isFavorite = searchParams.get("favorite") === "true";
     const sortBy = searchParams.get("sortBy") || "uploadedAt";
     const sortOrder = searchParams.get("sortOrder") === "asc" ? "asc" : "desc";
-    const limit = Math.min(parseInt(searchParams.get("limit") || "50", 10), 200);
-    const offset = parseInt(searchParams.get("offset") || "0", 10);
+    const limit = parseBoundedInt(searchParams.get("limit"), 50, 1, 200);
+    const offset = parseBoundedInt(searchParams.get("offset"), 0, 0, Number.MAX_SAFE_INTEGER);
 
     // Build strictly owner-scoped where filter
     const where: any = {
@@ -216,12 +239,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Handle initial tags if provided
+    // Handle initial tags if provided (bounded count + length)
     if (customTags) {
       const tagsList = customTags
         .split(",")
         .map((t) => t.trim().toLowerCase())
-        .filter((t) => t.length > 0);
+        .filter((t) => t.length > 0)
+        .map((t) => t.slice(0, MAX_TAG_LENGTH))
+        .slice(0, MAX_TAGS_PER_FILE);
 
       for (const tag of tagsList) {
         await prisma.fileTag.create({
@@ -255,8 +280,9 @@ export async function POST(req: NextRequest) {
     );
   } catch (error: any) {
     console.error("Upload file error:", error);
+    // Generic message: raw error text can leak Telegram/crypto internals.
     return NextResponse.json(
-      { error: error.message || "Failed to upload file to Telegram Saved Messages." },
+      { error: "Failed to upload file to Telegram Saved Messages." },
       { status: 500 }
     );
   }

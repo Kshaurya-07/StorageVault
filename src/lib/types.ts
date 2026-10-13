@@ -22,6 +22,8 @@ export interface UserSession {
   userId: string;
   email: string;
   name?: string | null;
+  /** Bumped on password change/reset; tokens carrying a stale version are rejected. */
+  tokenVersion?: number;
 }
 
 export interface TelegramStatusResponse {
@@ -32,7 +34,6 @@ export interface TelegramStatusResponse {
   telegramFirstName?: string | null;
   phoneNumber?: string | null;
   connectedAt?: string | null;
-  mode: "real" | "mock";
 }
 
 export interface FileMetadata {

@@ -56,9 +56,9 @@ export default function FileCard({
     }
   };
 
-  const handleDownload = () => {
-    window.open(`/api/files/${file.id}/download`, "_blank");
-  };
+  // Direct download link (anchor with download attr) instead of window.open:
+  // same-tab navigation keeps auth cookies and can't be abused as a popup.
+  const downloadHref = `/api/files/${file.id}/download`;
 
   const handleRenameSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,13 +97,14 @@ export default function FileCard({
           </button>
 
           {/* Quick Download */}
-          <button
-            onClick={handleDownload}
+          <a
+            href={downloadHref}
+            download={file.displayFilename}
             className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 opacity-0 group-hover:opacity-100 transition"
             title="Download from Telegram"
           >
             <Download className="w-3.5 h-3.5" />
-          </button>
+          </a>
 
           {/* Delete */}
           <button

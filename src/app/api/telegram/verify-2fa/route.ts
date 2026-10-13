@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { getTelegramService } from "@/lib/telegram/telegramService";
 import { encryptData } from "@/lib/crypto";
+import { checkRateLimit, rateLimitedResponse } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,6 +11,14 @@ export async function POST(req: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Brute-force guard on the 2FA cloud password: 10 attempts / 10 min.
+    const attemptLimit = checkRateLimit(
+      `tg:verify2fa:user:${session.userId}`,
+      10,
+      10 * 60 * 1000
+    );
+    if (!attemptLimit.allowed) return rateLimitedResponse(attemptLimit.retryAfterMs);
 
     const { password } = await req.json();
     if (!password) {
@@ -30,10 +39,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (conn.codeExpiresAt && conn.codeExpiresAt.getTime() < Date.now()) {
+      await prisma.telegramConnection.update({
+        where: { userId: session.userId },
+        data: {
+          phoneCodeHash: null,
+          codeExpiresAt: null,
+          connectionStatus: "DISCONNECTED",
+        },
+      });
+      return NextResponse.json(
+        { error: "This verification session has expired. Please request a new code." },
+        { status: 400 }
+      );
+    }
+
     const telegramService = await getTelegramService();
     const result = await telegramService.signIn2FA({
       password,
       phoneNumber: conn.phoneNumber || undefined,
+      userId: session.userId,
     });
 
     if (!result.sessionString) {
@@ -55,6 +80,7 @@ export async function POST(req: NextRequest) {
         connectionStatus: "CONNECTED",
         connectedAt: new Date(),
         phoneCodeHash: null,
+        codeExpiresAt: null,
       },
     });
 

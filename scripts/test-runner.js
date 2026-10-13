@@ -5,6 +5,12 @@ execSync("npx prisma generate --schema=prisma/schema.sqlite.prisma", {
   stdio: "inherit",
   env: { ...process.env, DATABASE_URL: "file:./dev.db" },
 });
+// Push the schema into the sqlite file so tables actually exist.
+// (Without this the DB stays empty and DB-backed suites fail.)
+execSync("npx prisma db push --schema=prisma/schema.sqlite.prisma --skip-generate", {
+  stdio: "inherit",
+  env: { ...process.env, DATABASE_URL: "file:./dev.db" },
+});
 
 let testError = null;
 try {

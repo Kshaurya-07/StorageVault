@@ -24,16 +24,22 @@ export interface DownloadResult {
 }
 
 export interface ITelegramService {
-  sendCode(phoneNumber: string): Promise<SendCodeResult>;
+  /**
+   * Sends a Telegram login code. `userId` scopes the pending MTProto client so
+   * one user's flow can never overwrite or observe another's.
+   */
+  sendCode(phoneNumber: string, userId: string): Promise<SendCodeResult>;
   signIn(params: {
     phoneNumber: string;
     phoneCodeHash: string;
     phoneCode: string;
+    userId: string;
   }): Promise<SignInResult>;
   signIn2FA(params: {
     password: string;
     phoneNumber?: string;
     phoneCodeHash?: string;
+    userId: string;
   }): Promise<SignInResult>;
   uploadToSavedMessages(params: {
     sessionString: string;
@@ -55,6 +61,11 @@ export interface ITelegramService {
     username?: string;
     firstName?: string;
   }>;
+  /**
+   * Best-effort server-side session revocation (Telegram auth.logOut).
+   * Optional so mocks/tests can omit or no-op it.
+   */
+  revokeSession?(sessionString: string): Promise<void>;
 }
 
 /**

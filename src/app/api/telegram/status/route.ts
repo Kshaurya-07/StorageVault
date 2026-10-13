@@ -15,8 +15,6 @@ export async function GET(req: NextRequest) {
       where: { userId: session.userId },
     });
 
-    const mode = (process.env.TELEGRAM_MODE || "mock").toLowerCase() as "real" | "mock";
-
     return NextResponse.json({
       connected: conn?.connectionStatus === "CONNECTED",
       status: conn?.connectionStatus || "DISCONNECTED",
@@ -25,7 +23,6 @@ export async function GET(req: NextRequest) {
       telegramFirstName: conn?.telegramFirstName || null,
       phoneNumber: conn?.phoneNumber ? conn.phoneNumber.replace(/(\d{3})\d+(\d{4})/, "$1****$2") : null,
       connectedAt: conn?.connectedAt?.toISOString() || null,
-      mode,
     });
   } catch (error: any) {
     console.error("Telegram status error:", error);

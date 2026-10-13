@@ -111,13 +111,14 @@ export default function FileListRow({
             <Eye className="w-3.5 h-3.5" />
           </button>
 
-          <button
-            onClick={() => window.open(`/api/files/${file.id}/download`, "_blank")}
+          <a
+            href={`/api/files/${file.id}/download`}
+            download={file.displayFilename}
             className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition"
             title="Download"
           >
             <Download className="w-3.5 h-3.5" />
-          </button>
+          </a>
 
           <button
             onClick={() => onDelete(file.id)}

@@ -53,8 +53,16 @@ export default function SettingsPage() {
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
+    if (!currentPassword) {
+      setMsg({ type: "error", text: "Please enter your current password." });
+      return;
+    }
     if (newPassword.length < 8) {
       setMsg({ type: "error", text: "New password must be at least 8 characters long." });
+      return;
+    }
+    if (newPassword.length > 72) {
+      setMsg({ type: "error", text: "New password must not exceed 72 characters." });
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -90,15 +98,23 @@ export default function SettingsPage() {
       "CAUTION: Deleting your account will remove your metadata, indexes, and session credentials. Type 'DELETE' to confirm:"
     );
     if (confirmation !== "DELETE") return;
+    // Password re-confirmation is required by the API for this destructive action.
+    const password = prompt("Enter your current password to permanently delete your account:");
+    if (!password) return;
 
     setDeletingAccount(true);
     try {
-      const res = await fetch("/api/auth/delete-account", { method: "DELETE" });
+      const res = await fetch("/api/auth/delete-account", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword: password }),
+      });
       if (res.ok) {
         alert("Your account and all associated data have been permanently deleted.");
         router.push("/register");
       } else {
-        alert("Failed to delete account.");
+        const d = await res.json().catch(() => ({}));
+        alert(d.error || "Failed to delete account.");
       }
     } catch {
       alert("Error deleting account.");

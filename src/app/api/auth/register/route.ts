@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { hashPassword, signSessionToken, getCookieSettings } from "@/lib/auth";
+import { checkRateLimit, getClientIp, rateLimitedResponse } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 5 registrations per hour per IP (anti-spam / mass-account abuse).
+    const rl = checkRateLimit(`register:ip:${getClientIp(req)}`, 5, 60 * 60 * 1000);
+    if (!rl.allowed) return rateLimitedResponse(rl.retryAfterMs);
+
     const body = await req.json();
     const { email, password, name } = body;
 
@@ -18,6 +23,14 @@ export async function POST(req: NextRequest) {
     if (!password || typeof password !== "string" || password.length < 8) {
       return NextResponse.json(
         { error: "Password must be at least 8 characters long." },
+        { status: 400 }
+      );
+    }
+
+    if (password.length > 72) {
+      // bcrypt silently truncates beyond 72 bytes; reject to avoid ambiguity.
+      return NextResponse.json(
+        { error: "Password must not exceed 72 characters." },
         { status: 400 }
       );
     }
@@ -56,6 +69,7 @@ export async function POST(req: NextRequest) {
       userId: user.id,
       email: user.email,
       name: user.name,
+      tokenVersion: user.tokenVersion,
     });
 
     const response = NextResponse.json(

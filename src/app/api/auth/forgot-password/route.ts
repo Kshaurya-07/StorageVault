@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SignJWT, jwtVerify } from "jose";
 import prisma from "@/lib/db";
-import { hashPassword } from "@/lib/auth";
+import { hashPassword, getJwtSecret } from "@/lib/auth";
+import { checkRateLimit, getClientIp, rateLimitedResponse } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
-
-function getJwtSecret(): Uint8Array {
-  const secret = process.env.JWT_SECRET || "vault-ai-default-jwt-secret-do-not-use-in-prod";
-  return new TextEncoder().encode(secret);
-}
 
 /**
  * POST /api/auth/forgot-password
@@ -27,6 +23,12 @@ export async function POST(req: NextRequest) {
       if (!newPassword || typeof newPassword !== "string" || newPassword.length < 8) {
         return NextResponse.json(
           { error: "New password must be at least 8 characters long." },
+          { status: 400 }
+        );
+      }
+      if (newPassword.length > 72) {
+        return NextResponse.json(
+          { error: "New password must not exceed 72 characters." },
           { status: 400 }
         );
       }
@@ -60,10 +62,20 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // Single-use binding: the token is only valid if the password has not
+      // changed since the token was issued. Bumping tokenVersion below makes
+      // any replay of this token fail.
+      if (typeof payload.tokenVersion === "number" && payload.tokenVersion !== user.tokenVersion) {
+        return NextResponse.json(
+          { error: "This reset link has already been used. Please request a new one." },
+          { status: 400 }
+        );
+      }
+
       const passwordHash = await hashPassword(newPassword);
       await prisma.user.update({
         where: { id: user.id },
-        data: { passwordHash },
+        data: { passwordHash, tokenVersion: { increment: 1 } },
       });
 
       return NextResponse.json({
@@ -73,6 +85,11 @@ export async function POST(req: NextRequest) {
     }
 
     // STEP 1: Request password reset link by email
+    // Rate limit: 5 requests/hour per email, 20/hour per IP (anti email-bombing).
+    const ip = getClientIp(req);
+    const ipLimit = checkRateLimit(`pwreset:ip:${ip}`, 20, 60 * 60 * 1000);
+    if (!ipLimit.allowed) return rateLimitedResponse(ipLimit.retryAfterMs);
+
     if (!email) {
       return NextResponse.json(
         { error: "Email address is required." },
@@ -81,6 +98,9 @@ export async function POST(req: NextRequest) {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+    const emailLimit = checkRateLimit(`pwreset:email:${normalizedEmail}`, 5, 60 * 60 * 1000);
+    if (!emailLimit.allowed) return rateLimitedResponse(emailLimit.retryAfterMs);
+
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
@@ -93,11 +113,13 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Generate signed, 15-minute expiration reset token
+    // Generate signed, 15-minute expiration reset token, bound to the current
+    // tokenVersion so it becomes single-use once the password is reset.
     const resetToken = await new SignJWT({
       userId: user.id,
       email: user.email,
       type: "password_reset",
+      tokenVersion: user.tokenVersion,
     })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
