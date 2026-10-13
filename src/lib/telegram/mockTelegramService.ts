@@ -108,13 +108,26 @@ export class MockTelegramService implements ITelegramService {
 
   async uploadToSavedMessages(params: {
     sessionString: string;
-    fileBuffer: Buffer;
     fileName: string;
     mimeType: string;
+    fileBuffer?: Buffer;
+    filePath?: string;
+    fileSizeBytes?: number;
   }): Promise<UploadFileResult> {
-    const { sessionString, fileBuffer, fileName, mimeType } = params;
+    const { sessionString, fileName, mimeType } = params;
     if (!sessionString) {
       throw new Error("AUTH_KEY_UNREGISTERED: Unauthorized Telegram session.");
+    }
+
+    // The mock keeps everything in memory by design (tests only use tiny
+    // fixtures); resolve a filePath to a buffer here.
+    let fileBuffer = params.fileBuffer;
+    if (!fileBuffer && params.filePath) {
+      const { promises: fs } = await import("fs");
+      fileBuffer = await fs.readFile(params.filePath);
+    }
+    if (!fileBuffer) {
+      throw new Error("Upload requires fileBuffer or filePath.");
     }
 
     let userStorage = this.userSavedMessages.get(sessionString);

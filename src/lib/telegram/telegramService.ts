@@ -43,9 +43,22 @@ export interface ITelegramService {
   }): Promise<SignInResult>;
   uploadToSavedMessages(params: {
     sessionString: string;
-    fileBuffer: Buffer;
     fileName: string;
     mimeType: string;
+    /**
+     * Small files can be passed in-memory (kept for backwards compatibility
+     * and tests). Large files SHOULD be passed via `filePath` so the upload
+     * streams from disk instead of being fully buffered in RAM.
+     * At least one of `fileBuffer` / `filePath` is required.
+     */
+    fileBuffer?: Buffer;
+    /** Absolute path of a temp file holding the upload bytes. */
+    filePath?: string;
+    /**
+     * Exact byte count. Required when `filePath` is used (the service cannot
+     * know the size otherwise); falls back to `fileBuffer.length` when omitted.
+     */
+    fileSizeBytes?: number;
   }): Promise<UploadFileResult>;
   downloadFromSavedMessages(params: {
     sessionString: string;

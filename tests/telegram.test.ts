@@ -52,6 +52,37 @@ describe("Telegram Saved Messages MTProto Integration", () => {
     expect(twoFaRes.sessionString).toBeDefined();
   });
 
+  it("should upload a file from disk via filePath (streaming path)", async () => {
+    const { promises: fs } = await import("fs");
+    const os = await import("os");
+    const path = await import("path");
+
+    const tmpFile = path.join(os.tmpdir(), `vault-test-${Date.now()}.bin`);
+    const payload = Buffer.from("streamed from disk, not from RAM");
+    await fs.writeFile(tmpFile, payload);
+
+    try {
+      const upload = await tgService.uploadToSavedMessages({
+        sessionString: "mock_session_disk_upload",
+        filePath: tmpFile,
+        fileSizeBytes: payload.length,
+        fileName: "diskfile.bin",
+        mimeType: "application/octet-stream",
+      });
+
+      expect(upload.telegramMessageId).toBeGreaterThan(0);
+      expect(upload.fileSizeBytes).toBe(payload.length);
+
+      const downloaded = await tgService.downloadFromSavedMessages({
+        sessionString: "mock_session_disk_upload",
+        messageId: upload.telegramMessageId,
+      });
+      expect(downloaded.buffer.toString()).toBe("streamed from disk, not from RAM");
+    } finally {
+      await fs.unlink(tmpFile).catch(() => {});
+    }
+  });
+
   it("should upload file directly to personal Saved Messages and return message ID", async () => {
     const sessionString = "mock_session_user_alice";
     const buffer = Buffer.from("Hello Telegram Saved Messages");

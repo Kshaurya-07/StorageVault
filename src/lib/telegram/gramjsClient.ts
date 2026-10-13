@@ -228,15 +228,28 @@ export class GramJsTelegramService implements ITelegramService {
 
   async uploadToSavedMessages(params: {
     sessionString: string;
-    fileBuffer: Buffer;
     fileName: string;
     mimeType: string;
+    fileBuffer?: Buffer;
+    filePath?: string;
+    fileSizeBytes?: number;
   }): Promise<UploadFileResult> {
-    const { sessionString, fileBuffer, fileName } = params;
+    const { sessionString, fileBuffer, filePath, fileName } = params;
     const { client } = await this.createClient(sessionString);
 
+    const size =
+      typeof params.fileSizeBytes === "number"
+        ? params.fileSizeBytes
+        : fileBuffer?.length;
+    if (size === undefined || size < 0) {
+      throw new Error("Upload requires fileBuffer or filePath with fileSizeBytes.");
+    }
+
     try {
-      const customFile = new CustomFile(fileName, fileBuffer.length, "", fileBuffer);
+      // When a filePath is supplied, gramjs reads the file from disk in
+      // chunks (CustomBuffer slices via fs) for files above its internal
+      // buffer threshold — the multi-GB payload is never fully held in RAM.
+      const customFile = new CustomFile(fileName, size, filePath ?? "", fileBuffer);
 
       // In Telegram MTProto, "me" routes directly to the user's personal Saved Messages
       const result: any = await client.sendFile("me", {
@@ -251,7 +264,7 @@ export class GramJsTelegramService implements ITelegramService {
       return {
         telegramMessageId: result.id,
         telegramFileReference: result.media?.document?.id?.toString(),
-        fileSizeBytes: fileBuffer.length,
+        fileSizeBytes: size,
       };
     } catch (err: any) {
       await client.disconnect();

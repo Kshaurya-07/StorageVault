@@ -3,6 +3,7 @@ import { SignJWT, jwtVerify } from "jose";
 import prisma from "@/lib/db";
 import { hashPassword, getJwtSecret } from "@/lib/auth";
 import { checkRateLimit, getClientIp, rateLimitedResponse } from "@/lib/rateLimit";
+import { sendPasswordResetEmail, isSmtpConfigured } from "@/lib/mailer";
 
 export const dynamic = "force-dynamic";
 
@@ -128,14 +129,42 @@ export async function POST(req: NextRequest) {
 
     const isDev = process.env.NODE_ENV !== "production";
 
+    // Build the absolute reset URL for the email. Dev keeps the old
+    // relative-URL behavior in the JSON response for local testing.
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(
+      /\/$/,
+      ""
+    );
+    const absoluteResetUrl = `${appUrl}/forgot-password?token=${resetToken}`;
+
+    // Send the reset email when SMTP is configured; otherwise log the link
+    // server-side so local dev still works without a mail server.
+    let emailSent = false;
+    try {
+      const result = await sendPasswordResetEmail(user.email, absoluteResetUrl);
+      emailSent = result.sent;
+      if (!result.sent) {
+        console.log(
+          `[forgot-password] SMTP not configured — reset link for ${user.email}: ${absoluteResetUrl}`
+        );
+      }
+    } catch (mailError: any) {
+      // Never fail the request on mailer errors; log and keep the generic
+      // success response (token logic is untouched and still valid).
+      console.error("Failed to send password-reset email:", mailError?.message || mailError);
+    }
+
     return NextResponse.json({
       success: true,
-      message: "Password reset instructions have been generated.",
+      message: emailSent
+        ? "Password reset instructions have been sent to your email."
+        : "Password reset instructions have been generated.",
       // Include token and URL in dev mode for testing without an external mailer service
       ...(isDev
         ? {
             resetToken,
             resetUrl: `/forgot-password?token=${resetToken}`,
+            smtpConfigured: isSmtpConfigured(),
           }
         : {}),
     });

@@ -5,19 +5,12 @@ import { getTelegramService } from "@/lib/telegram/telegramService";
 import { decryptData } from "@/lib/crypto";
 import { detectCategory } from "@/lib/fileCategories";
 import { FileCategory } from "@/lib/types";
-
-// Maximum upload size: 2GB (Telegram limit).
-// Guard against misconfiguration: a non-numeric env value would make
-// parseInt return NaN, and `size > NaN` is always false (limit silently off).
-const DEFAULT_MAX_FILE_SIZE = 2097152000;
-const _parsedMaxSize = parseInt(
-  process.env.MAX_FILE_SIZE_BYTES || String(DEFAULT_MAX_FILE_SIZE),
-  10
-);
-const MAX_FILE_SIZE =
-  Number.isFinite(_parsedMaxSize) && _parsedMaxSize > 0
-    ? _parsedMaxSize
-    : DEFAULT_MAX_FILE_SIZE;
+import {
+  parseMultipartUpload,
+  cleanupUpload,
+  UploadParseError,
+  ParsedUpload,
+} from "@/lib/streamingUpload";
 
 // Tag limits: prevent DB-write amplification via unbounded tag lists.
 const MAX_TAGS_PER_FILE = 20;
@@ -186,98 +179,98 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Parse multipart form data
-    const formData = await req.formData();
-    const file = formData.get("file") as File | null;
-    const customTags = formData.get("tags") as string | null;
-
-    if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    // Parse multipart form data as a STREAM: the file part flows straight to
+    // a temp file on disk and is never fully buffered in server memory
+    // (prevents OOM on multi-GB uploads). The temp file is always cleaned
+    // up in the finally block below.
+    let parsed: ParsedUpload | null = null;
+    try {
+      parsed = await parseMultipartUpload(req);
+    } catch (err: any) {
+      if (err instanceof UploadParseError) {
+        // FILE_TOO_LARGE / NO_FILE / BAD_REQUEST all map to 400 with a safe
+        // client-facing message (same shape the frontend already handles).
+        return NextResponse.json({ error: err.message }, { status: 400 });
+      }
+      throw err;
     }
 
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        {
-          error: `File size exceeds the maximum limit of ${(
-            MAX_FILE_SIZE /
-            (1024 * 1024 * 1024)
-          ).toFixed(1)} GB.`,
-        },
-        { status: 400 }
-      );
-    }
-
-    const originalFilename = file.name || "unnamed_file";
-    const mimeType = file.type || "application/octet-stream";
+    const originalFilename = parsed.originalFilename;
+    const mimeType = parsed.mimeType;
+    const customTags = parsed.tags;
     const category = detectCategory(originalFilename, mimeType);
 
-    // Read file buffer in memory for streaming upload to Telegram
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    // Upload directly to authenticated user's Saved Messages via MTProto
-    const telegramService = await getTelegramService();
-    const uploadResult = await telegramService.uploadToSavedMessages({
-      sessionString,
-      fileBuffer: buffer,
-      fileName: originalFilename,
-      mimeType,
-    });
+    try {
+      // Upload to the authenticated user's Saved Messages via MTProto.
+      // The file streams from the temp file on disk (gramjs reads it in
+      // chunks), so server RAM stays flat regardless of file size.
+      const telegramService = await getTelegramService();
+      const uploadResult = await telegramService.uploadToSavedMessages({
+        sessionString,
+        filePath: parsed.filePath,
+        fileSizeBytes: parsed.fileSize,
+        fileName: originalFilename,
+        mimeType,
+      });
 
     // Record metadata in database
-    const createdFile = await prisma.file.create({
-      data: {
-        ownerUserId: session.userId,
-        telegramMessageId: uploadResult.telegramMessageId,
-        telegramFileReference: uploadResult.telegramFileReference || null,
-        originalFilename,
-        displayFilename: originalFilename,
-        mimeType,
-        fileSizeBytes: uploadResult.fileSizeBytes as any,
-        category,
-        uploadStatus: "COMPLETED",
-      },
-    });
-
-    // Handle initial tags if provided (bounded count + length)
-    if (customTags) {
-      const tagsList = customTags
-        .split(",")
-        .map((t) => t.trim().toLowerCase())
-        .filter((t) => t.length > 0)
-        .map((t) => t.slice(0, MAX_TAG_LENGTH))
-        .slice(0, MAX_TAGS_PER_FILE);
-
-      for (const tag of tagsList) {
-        await prisma.fileTag.create({
-          data: {
-            ownerUserId: session.userId,
-            fileId: createdFile.id,
-            tag,
-          },
-        }).catch(() => {});
-      }
-    }
-
-    return NextResponse.json(
-      {
-        success: true,
-        file: {
-          id: createdFile.id,
-          ownerUserId: createdFile.ownerUserId,
-          telegramMessageId: createdFile.telegramMessageId,
-          originalFilename: createdFile.originalFilename,
-          displayFilename: createdFile.displayFilename,
-          mimeType: createdFile.mimeType,
-          fileSizeBytes: Number(createdFile.fileSizeBytes),
-          category: createdFile.category,
-          uploadStatus: createdFile.uploadStatus,
-          isFavorite: createdFile.isFavorite,
-          uploadedAt: createdFile.uploadedAt.toISOString(),
+      const createdFile = await prisma.file.create({
+        data: {
+          ownerUserId: session.userId,
+          telegramMessageId: uploadResult.telegramMessageId,
+          telegramFileReference: uploadResult.telegramFileReference || null,
+          originalFilename,
+          displayFilename: originalFilename,
+          mimeType,
+          fileSizeBytes: uploadResult.fileSizeBytes as any,
+          category,
+          uploadStatus: "COMPLETED",
         },
-      },
-      { status: 201 }
-    );
+      });
+
+      // Handle initial tags if provided (bounded count + length)
+      if (customTags) {
+        const tagsList = customTags
+          .split(",")
+          .map((t) => t.trim().toLowerCase())
+          .filter((t) => t.length > 0)
+          .map((t) => t.slice(0, MAX_TAG_LENGTH))
+          .slice(0, MAX_TAGS_PER_FILE);
+
+        for (const tag of tagsList) {
+          await prisma.fileTag.create({
+            data: {
+              ownerUserId: session.userId,
+              fileId: createdFile.id,
+              tag,
+            },
+          }).catch(() => {});
+        }
+      }
+
+      return NextResponse.json(
+        {
+          success: true,
+          file: {
+            id: createdFile.id,
+            ownerUserId: createdFile.ownerUserId,
+            telegramMessageId: createdFile.telegramMessageId,
+            originalFilename: createdFile.originalFilename,
+            displayFilename: createdFile.displayFilename,
+            mimeType: createdFile.mimeType,
+            fileSizeBytes: Number(createdFile.fileSizeBytes),
+            category: createdFile.category,
+            uploadStatus: createdFile.uploadStatus,
+            isFavorite: createdFile.isFavorite,
+            uploadedAt: createdFile.uploadedAt.toISOString(),
+          },
+        },
+        { status: 201 }
+      );
+    } finally {
+      // Always remove the temp upload file, success or failure.
+      await cleanupUpload(parsed);
+    }
   } catch (error: any) {
     console.error("Upload file error:", error);
     // Generic message: raw error text can leak Telegram/crypto internals.
