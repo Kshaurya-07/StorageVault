@@ -59,7 +59,8 @@ export async function executeAiSearch(params: {
     }
   }
 
-  // Fetch candidate files for this user
+  // Fetch candidate files for this user.
+  // Bounded: scoring happens in JS, so cap candidates to keep memory flat.
   const candidateFiles = await prisma.file.findMany({
     where: whereClause,
     include: {
@@ -68,6 +69,7 @@ export async function executeAiSearch(params: {
     orderBy: {
       uploadedAt: "desc",
     },
+    take: 2000,
   });
 
   // 2. Score candidates based on keyword relevance

@@ -53,8 +53,16 @@ export default function SettingsPage() {
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
+    if (!currentPassword) {
+      setMsg({ type: "error", text: "Please enter your current password." });
+      return;
+    }
     if (newPassword.length < 8) {
       setMsg({ type: "error", text: "New password must be at least 8 characters long." });
+      return;
+    }
+    if (newPassword.length > 72) {
+      setMsg({ type: "error", text: "New password must not exceed 72 characters." });
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -90,15 +98,23 @@ export default function SettingsPage() {
       "CAUTION: Deleting your account will remove your metadata, indexes, and session credentials. Type 'DELETE' to confirm:"
     );
     if (confirmation !== "DELETE") return;
+    // Password re-confirmation is required by the API for this destructive action.
+    const password = prompt("Enter your current password to permanently delete your account:");
+    if (!password) return;
 
     setDeletingAccount(true);
     try {
-      const res = await fetch("/api/auth/delete-account", { method: "DELETE" });
+      const res = await fetch("/api/auth/delete-account", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword: password }),
+      });
       if (res.ok) {
         alert("Your account and all associated data have been permanently deleted.");
         router.push("/register");
       } else {
-        alert("Failed to delete account.");
+        const d = await res.json().catch(() => ({}));
+        alert(d.error || "Failed to delete account.");
       }
     } catch {
       alert("Error deleting account.");
@@ -269,7 +285,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={updatingPassword}
-              className="bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-semibold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-2 shadow-md"
+              className="bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold text-xs px-5 py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-brand-500/25 min-h-[48px]"
             >
               {updatingPassword && <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />}
               <span>Update Password</span>

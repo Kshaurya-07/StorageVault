@@ -9,22 +9,23 @@ describe("Telegram Saved Messages MTProto Integration", () => {
   });
 
   it("should send confirmation code for valid phone number", async () => {
-    const res = await tgService.sendCode("+1234567890");
+    const res = await tgService.sendCode("+1234567890", "test-user");
     expect(res.phoneCodeHash).toBeDefined();
     expect(res.phoneCodeHash.startsWith("mock_hash_")).toBe(true);
     expect(res.isCodeViaApp).toBe(true);
   });
 
   it("should fail sendCode for invalid phone numbers", async () => {
-    await expect(tgService.sendCode("12")).rejects.toThrow("PHONE_NUMBER_INVALID");
+    await expect(tgService.sendCode("12", "test-user")).rejects.toThrow("PHONE_NUMBER_INVALID");
   });
 
   it("should sign in successfully with valid phone code and return session string", async () => {
-    const codeRes = await tgService.sendCode("+1234567890");
+    const codeRes = await tgService.sendCode("+1234567890", "test-user");
     const signRes = await tgService.signIn({
       phoneNumber: "+1234567890",
       phoneCodeHash: codeRes.phoneCodeHash,
       phoneCode: "12345",
+      userId: "test-user",
     });
 
     expect(signRes.needs2FA).toBe(false);
@@ -34,20 +35,52 @@ describe("Telegram Saved Messages MTProto Integration", () => {
   });
 
   it("should trigger 2FA challenge when required and complete with password", async () => {
-    const codeRes = await tgService.sendCode("+19999999999");
+    const codeRes = await tgService.sendCode("+19999999999", "test-user");
     const signRes = await tgService.signIn({
       phoneNumber: "+19999999999",
       phoneCodeHash: codeRes.phoneCodeHash,
       phoneCode: "99999", // triggers 2FA in mock
+      userId: "test-user",
     });
 
     expect(signRes.needs2FA).toBe(true);
     expect(signRes.sessionString).toBeUndefined();
 
     // Now submit 2FA password
-    const twoFaRes = await tgService.signIn2FA({ password: "myCloudPassword123" });
+    const twoFaRes = await tgService.signIn2FA({ password: "myCloudPassword123", userId: "test-user" });
     expect(twoFaRes.needs2FA).toBe(false);
     expect(twoFaRes.sessionString).toBeDefined();
+  });
+
+  it("should upload a file from disk via filePath (streaming path)", async () => {
+    const { promises: fs } = await import("fs");
+    const os = await import("os");
+    const path = await import("path");
+
+    const tmpFile = path.join(os.tmpdir(), `vault-test-${Date.now()}.bin`);
+    const payload = Buffer.from("streamed from disk, not from RAM");
+    await fs.writeFile(tmpFile, payload);
+
+    try {
+      const upload = await tgService.uploadToSavedMessages({
+        sessionString: "mock_session_disk_upload",
+        filePath: tmpFile,
+        fileSizeBytes: payload.length,
+        fileName: "diskfile.bin",
+        mimeType: "application/octet-stream",
+      });
+
+      expect(upload.telegramMessageId).toBeGreaterThan(0);
+      expect(upload.fileSizeBytes).toBe(payload.length);
+
+      const downloaded = await tgService.downloadFromSavedMessages({
+        sessionString: "mock_session_disk_upload",
+        messageId: upload.telegramMessageId,
+      });
+      expect(downloaded.buffer.toString()).toBe("streamed from disk, not from RAM");
+    } finally {
+      await fs.unlink(tmpFile).catch(() => {});
+    }
   });
 
   it("should upload file directly to personal Saved Messages and return message ID", async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   X,
   UploadCloud,
@@ -10,9 +10,21 @@ import {
   Loader2,
   Tag,
   Send,
+  RotateCcw,
+  Ban,
+  Layers,
 } from "lucide-react";
 import { formatBytes } from "@/lib/fileCategories";
 import Link from "next/link";
+import {
+  shouldUseChunkedUpload,
+  uploadFileChunked,
+  uploadFileDirect,
+  CancelToken,
+  CancelledError,
+  listInterruptedUploads,
+  CHUNK_SIZE_BYTES,
+} from "@/lib/chunkedUploader";
 
 interface FileUploadModalProps {
   isOpen: boolean;
@@ -20,12 +32,23 @@ interface FileUploadModalProps {
   onSuccess: () => void;
 }
 
-interface UploadingFile {
+type ItemStatus = "queued" | "uploading" | "done" | "error" | "cancelled";
+
+interface QueueItem {
+  key: string;
   file: File;
-  progress: number;
-  status: "pending" | "uploading" | "success" | "error";
-  errorMessage?: string;
+  chunked: boolean;
+  status: ItemStatus;
+  progress: number; // 0-100
+  doneChunks: number;
+  totalChunks: number;
+  error?: string;
+  code?: string;
+  uploadId?: string;
+  cancelToken: CancelToken;
 }
+
+let keyCounter = 0;
 
 export default function FileUploadModal({
   isOpen,
@@ -33,22 +56,45 @@ export default function FileUploadModal({
   onSuccess,
 }: FileUploadModalProps) {
   const [dragActive, setDragActive] = useState(false);
-  const [queue, setQueue] = useState<UploadingFile[]>([]);
+  const [items, setItems] = useState<QueueItem[]>([]);
   const [tags, setTags] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
   const [telegramNotConnected, setTelegramNotConnected] = useState(false);
+  const [interrupted, setInterrupted] = useState<
+    Array<{ fingerprint: string; fileName: string; uploaded: number; totalChunks: number }>
+  >([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const itemsRef = useRef<QueueItem[]>([]);
+  itemsRef.current = items;
+
+  useEffect(() => {
+    if (isOpen) {
+      setInterrupted(listInterruptedUploads());
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
+  const patchItem = (key: string, patch: Partial<QueueItem>) => {
+    setItems((prev) => prev.map((it) => (it.key === key ? { ...it, ...patch } : it)));
+  };
+
   const handleFiles = (incoming: FileList | null) => {
     if (!incoming) return;
-    const newItems: UploadingFile[] = Array.from(incoming).map((file) => ({
-      file,
-      progress: 0,
-      status: "pending",
-    }));
-    setQueue((prev) => [...prev, ...newItems]);
+    const fresh: QueueItem[] = Array.from(incoming).map((file) => {
+      const chunked = shouldUseChunkedUpload(file);
+      const totalChunks = chunked ? Math.ceil(file.size / CHUNK_SIZE_BYTES) : 1;
+      return {
+        key: `q-${Date.now()}-${keyCounter++}`,
+        file,
+        chunked,
+        status: "queued" as ItemStatus,
+        progress: 0,
+        doneChunks: 0,
+        totalChunks,
+        cancelToken: new CancelToken(),
+      };
+    });
+    setItems((prev) => [...prev, ...fresh]);
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -70,102 +116,115 @@ export default function FileUploadModal({
     }
   };
 
-  const startUpload = async () => {
-    if (queue.length === 0 || isProcessing) return;
-    setIsProcessing(true);
-    setTelegramNotConnected(false);
+  const startItem = (item: QueueItem) => {
+    const token = new CancelToken();
+    patchItem(item.key, {
+      status: "uploading",
+      progress: 0,
+      doneChunks: 0,
+      error: undefined,
+      code: undefined,
+      uploadId: undefined,
+      cancelToken: token,
+    });
 
-    let anySuccess = false;
-
-    for (let i = 0; i < queue.length; i++) {
-      if (queue[i].status === "success") continue;
-
-      // Update item to uploading
-      setQueue((prev) =>
-        prev.map((item, idx) =>
-          idx === i ? { ...item, status: "uploading", progress: 20 } : item
-        )
-      );
-
-      const formData = new FormData();
-      formData.append("file", queue[i].file);
-      if (tags.trim()) {
-        formData.append("tags", tags.trim());
-      }
-
-      let progressTimer: NodeJS.Timeout | null = null;
-      try {
-        // Progress simulation for user feedback
-        progressTimer = setInterval(() => {
-          setQueue((prev) =>
-            prev.map((item, idx) =>
-              idx === i && item.progress < 85
-                ? { ...item, progress: item.progress + 15 }
-                : item
-            )
-          );
-        }, 150);
-
-        const res = await fetch("/api/files", {
-          method: "POST",
-          body: formData,
+    const onError = (err: any) => {
+      if (err instanceof CancelledError || token.cancelled) {
+        patchItem(item.key, { status: "cancelled", progress: 0 });
+      } else {
+        if (err?.code === "TELEGRAM_NOT_CONNECTED") setTelegramNotConnected(true);
+        patchItem(item.key, {
+          status: "error",
+          error: err?.message || "Upload failed",
+          code: err?.code,
         });
+      }
+      maybeFinish();
+    };
 
-        if (progressTimer) clearInterval(progressTimer);
-        const data = await res.json();
+    if (item.chunked) {
+      uploadFileChunked(
+        item.file,
+        token,
+        {
+          onProgress: (done, total) => {
+            patchItem(item.key, {
+              doneChunks: done,
+              totalChunks: total,
+              progress: total > 0 ? Math.round((done / total) * 100) : 0,
+            });
+          },
+          onUploadId: (uploadId) => patchItem(item.key, { uploadId }),
+        },
+        tags
+      ).then(
+        () => {
+          patchItem(item.key, { status: "done", progress: 100 });
+          maybeFinish();
+        },
+        onError
+      );
+    } else {
+      uploadFileDirect(item.file, tags, token, {
+        onProgress: (percent) => patchItem(item.key, { progress: percent }),
+      }).then(
+        () => {
+          patchItem(item.key, { status: "done", progress: 100 });
+          maybeFinish();
+        },
+        onError
+      );
+    }
+  };
 
-        if (res.ok && data.success) {
-          anySuccess = true;
-          setQueue((prev) =>
-            prev.map((item, idx) =>
-              idx === i ? { ...item, status: "success", progress: 100 } : item
-            )
-          );
-        } else {
-          if (data.code === "TELEGRAM_NOT_CONNECTED") {
-            setTelegramNotConnected(true);
-          }
-          setQueue((prev) =>
-            prev.map((item, idx) =>
-              idx === i
-                ? {
-                    ...item,
-                    status: "error",
-                    progress: 0,
-                    errorMessage: data.error || "Upload failed",
-                  }
-                : item
-            )
-          );
-        }
-      } catch (err: any) {
-        if (progressTimer) clearInterval(progressTimer);
-        setQueue((prev) =>
-          prev.map((item, idx) =>
-            idx === i
-              ? {
-                  ...item,
-                  status: "error",
-                  progress: 0,
-                  errorMessage: err.message || "Network error",
-                }
-              : item
-          )
-        );
+  const maybeFinish = () => {
+    // Refresh the file list shortly after any success, once the queue settles.
+    const current = itemsRef.current;
+    if (
+      current.some((it) => it.status === "done") &&
+      !current.some((it) => it.status === "uploading" || it.status === "queued")
+    ) {
+      setTimeout(() => onSuccess(), 700);
+    }
+  };
+
+  const startAll = () => {
+    setTelegramNotConnected(false);
+    const current = itemsRef.current;
+    current
+      .filter((it) => it.status === "queued" || it.status === "error")
+      .forEach((it) => startItem(it));
+  };
+
+  const cancelItem = async (item: QueueItem) => {
+    item.cancelToken.cancel();
+    if (item.uploadId) {
+      // Tell the server to stop accepting chunks for this session.
+      try {
+        await fetch("/api/files/chunks/cancel", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uploadId: item.uploadId }),
+        });
+      } catch {
+        /* best effort */
       }
     }
-
-    setIsProcessing(false);
-    if (anySuccess) {
-      setTimeout(() => {
-        onSuccess();
-      }, 700);
-    }
+    patchItem(item.key, { status: "cancelled" });
   };
 
-  const removeQueueItem = (index: number) => {
-    setQueue((prev) => prev.filter((_, idx) => idx !== index));
+  const retryItem = (item: QueueItem) => {
+    startItem(item);
   };
+
+  const removeItem = (key: string) => {
+    setItems((prev) => prev.filter((it) => it.key !== key));
+  };
+
+  const activeCount = items.filter(
+    (it) => it.status === "uploading" || it.status === "queued"
+  ).length;
+  const doneCount = items.filter((it) => it.status === "done").length;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
@@ -178,14 +237,15 @@ export default function FileUploadModal({
             </div>
             <div>
               <h2 className="text-sm font-bold text-white">Upload to Saved Messages</h2>
-              <p className="text-[11px] text-neutral-400">
-                Directly stream into your personal Telegram cloud storage
+              <p className="text-xs text-neutral-400">
+                Streams into your personal Telegram cloud · up to 50GB per file
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -211,6 +271,24 @@ export default function FileUploadModal({
                   <Send className="w-3.5 h-3.5" />
                   Connect Telegram Now
                 </Link>
+              </div>
+            </div>
+          )}
+
+          {interrupted.length > 0 && (
+            <div className="p-3.5 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-start gap-3">
+              <Layers className="w-5 h-5 text-brand-400 shrink-0 mt-0.5" />
+              <div className="text-xs">
+                <span className="font-semibold text-white">
+                  {interrupted.length} interrupted upload{interrupted.length > 1 ? "s" : ""} found
+                </span>
+                <p className="text-neutral-400 mt-0.5">
+                  Re-select the same file{interrupted.length > 1 ? "s" : ""} and only the missing
+                  parts will re-upload — e.g.{" "}
+                  <span className="text-neutral-200 font-medium">
+                    {interrupted[0].fileName} ({interrupted[0].uploaded}/{interrupted[0].totalChunks} parts done)
+                  </span>
+                </p>
               </div>
             </div>
           )}
@@ -241,8 +319,8 @@ export default function FileUploadModal({
             <p className="text-xs font-semibold text-white">
               Drag and drop files here, or <span className="text-neutral-300 underline">browse</span>
             </p>
-            <p className="text-[11px] text-neutral-400 mt-1 font-mono">
-              Supports PDF, DOCX, Images, Videos, MP3, ZIP up to 2.0 GB per file
+            <p className="text-xs text-neutral-400 mt-1 font-mono">
+              Multiple files at once · files over 2GB are auto-split into parts
             </p>
           </div>
 
@@ -261,58 +339,119 @@ export default function FileUploadModal({
             />
           </div>
 
-          {/* Queue List */}
-          {queue.length > 0 && (
+          {/* Upload Queue */}
+          {items.length > 0 && (
             <div className="space-y-2 pt-2">
-              <div className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider font-mono">
-                Selected Files ({queue.length})
+              <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider font-mono flex items-center justify-between">
+                <span>
+                  Upload Queue ({items.length})
+                  {doneCount > 0 && <span className="text-brand-400"> · {doneCount} done</span>}
+                </span>
+                <span className="normal-case font-sans">3 parallel uploads</span>
               </div>
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                {queue.map((item, idx) => (
+              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                {items.map((item) => (
                   <div
-                    key={idx}
-                    className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-between gap-3 text-xs"
+                    key={item.key}
+                    className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-xs"
                   >
-                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                      <FileIcon className="w-4 h-4 text-neutral-300 shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <div className="text-white font-medium truncate">
-                          {item.file.name}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <FileIcon className="w-4 h-4 text-neutral-300 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-white font-medium truncate flex items-center gap-1.5">
+                            <span className="truncate">{item.file.name}</span>
+                            {item.chunked && (
+                              <span className="shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-brand-500/15 text-brand-300 border border-brand-500/30">
+                                {item.totalChunks} parts
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-neutral-400 font-mono">
+                            {formatBytes(item.file.size)}
+                            {item.chunked && item.status === "uploading" && (
+                              <span> · part {Math.min(item.doneChunks + 1, item.totalChunks)}/{item.totalChunks}</span>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-[10px] text-neutral-400 font-mono">
-                          {formatBytes(item.file.size)}
-                        </div>
+                      </div>
+
+                      {/* Status / actions */}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {item.status === "uploading" && (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-300" />
+                            <span className="text-white font-mono text-xs w-10 text-right">
+                              {item.progress}%
+                            </span>
+                            <button
+                              onClick={() => cancelItem(item)}
+                              title="Cancel upload"
+                              className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-neutral-500 hover:text-white hover:bg-white/5 transition"
+                            >
+                              <Ban className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+                        {item.status === "queued" && (
+                          <button
+                            onClick={() => removeItem(item.key)}
+                            title="Remove from queue"
+                            className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-neutral-500 hover:text-white hover:bg-white/5 transition"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                        {item.status === "done" && (
+                          <CheckCircle className="w-4 h-4 text-brand-300" />
+                        )}
+                        {item.status === "cancelled" && (
+                          <>
+                            <span className="text-neutral-500 text-[10px]">Cancelled</span>
+                            <button
+                              onClick={() => retryItem(item)}
+                              title="Retry upload"
+                              className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+                        {item.status === "error" && (
+                          <>
+                            <span
+                              className="text-neutral-400 text-[10px] max-w-[140px] truncate"
+                              title={item.error}
+                            >
+                              {item.error || "Failed"}
+                            </span>
+                            <button
+                              onClick={() => retryItem(item)}
+                              title="Retry upload"
+                              className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
 
-                    {/* Progress / Status */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      {item.status === "uploading" && (
-                        <div className="flex items-center gap-2 text-white text-[11px] font-mono">
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>{item.progress}%</span>
-                        </div>
-                      )}
-                      {item.status === "success" && (
-                        <CheckCircle className="w-4 h-4 text-white" />
-                      )}
-                      {item.status === "error" && (
-                        <span className="text-neutral-400 text-[10px] max-w-[120px] truncate" title={item.errorMessage}>
-                          {item.errorMessage || "Failed"}
-                        </span>
-                      )}
-                      {item.status === "pending" && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeQueueItem(idx);
-                          }}
-                          className="text-neutral-500 hover:text-white transition"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
+                    {/* Progress bar */}
+                    {(item.status === "uploading" || item.status === "done" || item.status === "error") && (
+                      <div className="mt-2 h-1.5 rounded-full bg-neutral-800 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            item.status === "done"
+                              ? "bg-brand-400"
+                              : item.status === "error"
+                                ? "bg-red-400/70"
+                                : "bg-brand-500"
+                          }`}
+                          style={{ width: `${item.progress}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -322,24 +461,33 @@ export default function FileUploadModal({
 
         {/* Modal Footer */}
         <div className="px-6 py-3.5 border-t border-neutral-800 bg-neutral-950 flex items-center justify-between">
-          <span className="text-[11px] text-neutral-400 font-mono">
-            {queue.length} file(s) queued
+          <span className="text-xs text-neutral-400 font-mono">
+            {activeCount > 0
+              ? `${activeCount} uploading…`
+              : items.length > 0
+                ? `${items.length} file(s) in queue`
+                : "No files selected"}
           </span>
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              disabled={isProcessing}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900 transition"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900 transition min-h-[44px]"
             >
-              Cancel
+              Close
             </button>
             <button
-              onClick={startUpload}
-              disabled={queue.length === 0 || isProcessing}
-              className="flex items-center gap-2 bg-white hover:bg-neutral-200 disabled:opacity-50 text-black text-xs font-semibold px-5 py-2 rounded-xl shadow-md transition"
+              onClick={startAll}
+              disabled={items.length === 0 || activeCount > 0}
+              className="flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold text-xs px-5 py-3 rounded-xl shadow-lg shadow-brand-500/25 transition min-h-[48px]"
             >
-              {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />}
-              <span>{isProcessing ? "Uploading..." : "Upload to Telegram"}</span>
+              <UploadCloud className="w-3.5 h-3.5" />
+              <span>
+                {activeCount > 0
+                  ? "Uploading…"
+                  : doneCount > 0 && doneCount === items.length
+                    ? "All done"
+                    : "Start Upload"}
+              </span>
             </button>
           </div>
         </div>

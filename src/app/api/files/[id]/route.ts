@@ -86,7 +86,8 @@ export async function PATCH(
 
     const dataToUpdate: any = {};
     if (typeof displayFilename === "string" && displayFilename.trim()) {
-      dataToUpdate.displayFilename = displayFilename.trim();
+      // Cap length: unbounded names bloat list responses and break layouts.
+      dataToUpdate.displayFilename = displayFilename.trim().slice(0, 255);
     }
     if (typeof isFavorite === "boolean") {
       dataToUpdate.isFavorite = isFavorite;
