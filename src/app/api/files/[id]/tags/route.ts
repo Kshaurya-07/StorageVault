@@ -18,6 +18,16 @@ export async function POST(
     }
 
     const cleanTag = tag.trim().toLowerCase();
+    // Reject tags that are empty after trimming, and cap length.
+    if (cleanTag.length === 0) {
+      return NextResponse.json({ error: "Tag must not be empty" }, { status: 400 });
+    }
+    if (cleanTag.length > 50) {
+      return NextResponse.json(
+        { error: "Tag must not exceed 50 characters" },
+        { status: 400 }
+      );
+    }
 
     // Verify file ownership
     const file = await prisma.file.findFirst({

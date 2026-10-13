@@ -42,13 +42,15 @@ export class MockTelegramService implements ITelegramService {
     this.nextMessageId = 1000;
   }
 
-  async sendCode(phoneNumber: string): Promise<SendCodeResult> {
+  async sendCode(phoneNumber: string, userId?: string): Promise<SendCodeResult> {
     if (!phoneNumber || phoneNumber.trim().length < 6) {
       throw new Error("PHONE_NUMBER_INVALID: Please enter a valid international phone number.");
     }
     const cleanPhone = phoneNumber.replace(/\s+/g, "");
     const phoneCodeHash = `mock_hash_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    this.pendingCodes.set(cleanPhone, { phone: cleanPhone, hash: phoneCodeHash });
+    // Scope pending codes per user, mirroring the real service.
+    const key = userId ? `${userId}:${cleanPhone}` : cleanPhone;
+    this.pendingCodes.set(key, { phone: cleanPhone, hash: phoneCodeHash });
 
     return {
       phoneCodeHash,
@@ -60,6 +62,7 @@ export class MockTelegramService implements ITelegramService {
     phoneNumber: string;
     phoneCodeHash: string;
     phoneCode: string;
+    userId?: string;
   }): Promise<SignInResult> {
     const { phoneNumber, phoneCode } = params;
     const cleanPhone = phoneNumber.replace(/\s+/g, "");
@@ -88,7 +91,7 @@ export class MockTelegramService implements ITelegramService {
     };
   }
 
-  async signIn2FA(params: { password: string }): Promise<SignInResult> {
+  async signIn2FA(params: { password: string; userId?: string }): Promise<SignInResult> {
     if (!params.password || params.password.length < 4) {
       throw new Error("PASSWORD_HASH_INVALID: Incorrect Telegram 2FA cloud password.");
     }
@@ -105,13 +108,26 @@ export class MockTelegramService implements ITelegramService {
 
   async uploadToSavedMessages(params: {
     sessionString: string;
-    fileBuffer: Buffer;
     fileName: string;
     mimeType: string;
+    fileBuffer?: Buffer;
+    filePath?: string;
+    fileSizeBytes?: number;
   }): Promise<UploadFileResult> {
-    const { sessionString, fileBuffer, fileName, mimeType } = params;
+    const { sessionString, fileName, mimeType } = params;
     if (!sessionString) {
       throw new Error("AUTH_KEY_UNREGISTERED: Unauthorized Telegram session.");
+    }
+
+    // The mock keeps everything in memory by design (tests only use tiny
+    // fixtures); resolve a filePath to a buffer here.
+    let fileBuffer = params.fileBuffer;
+    if (!fileBuffer && params.filePath) {
+      const { promises: fs } = await import("fs");
+      fileBuffer = await fs.readFile(params.filePath);
+    }
+    if (!fileBuffer) {
+      throw new Error("Upload requires fileBuffer or filePath.");
     }
 
     let userStorage = this.userSavedMessages.get(sessionString);
@@ -156,6 +172,29 @@ export class MockTelegramService implements ITelegramService {
     };
   }
 
+  /**
+   * Mock streaming download: yields the stored buffer in 64KB slices so
+   * chunked-reassembly code paths can be tested without buffering concerns.
+   */
+  async downloadStreamFromSavedMessages(params: {
+    sessionString: string;
+    messageId: number;
+  }): Promise<AsyncIterable<Buffer>> {
+    const { sessionString, messageId } = params;
+    const userStorage = this.userSavedMessages.get(sessionString);
+    if (!userStorage || !userStorage.has(messageId)) {
+      throw new Error(`MESSAGE_ID_INVALID: File not found in user's Telegram Saved Messages (id=${messageId})`);
+    }
+    const buf = userStorage.get(messageId)!.fileBuffer;
+    const SLICE = 64 * 1024;
+    async function* gen(): AsyncGenerator<Buffer> {
+      for (let off = 0; off < buf.length; off += SLICE) {
+        yield buf.subarray(off, Math.min(off + SLICE, buf.length));
+      }
+    }
+    return gen();
+  }
+
   async deleteFromSavedMessages(params: {
     sessionString: string;
     messageId: number;
@@ -184,5 +223,10 @@ export class MockTelegramService implements ITelegramService {
       username: "vault_user",
       firstName: "StorageVault User",
     };
+  }
+
+  /** Mock revocation: no-op (no real Telegram session exists). */
+  async revokeSession(_sessionString: string): Promise<void> {
+    return;
   }
 }

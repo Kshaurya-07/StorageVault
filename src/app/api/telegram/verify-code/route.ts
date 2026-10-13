@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { getTelegramService } from "@/lib/telegram/telegramService";
 import { encryptData } from "@/lib/crypto";
+import { checkRateLimit, rateLimitedResponse } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,6 +11,14 @@ export async function POST(req: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Brute-force guard: 10 code attempts per 10 minutes per user.
+    const attemptLimit = checkRateLimit(
+      `tg:verifycode:user:${session.userId}`,
+      10,
+      10 * 60 * 1000
+    );
+    if (!attemptLimit.allowed) return rateLimitedResponse(attemptLimit.retryAfterMs);
 
     const { phoneCode } = await req.json();
     if (!phoneCode || typeof phoneCode !== "string") {
@@ -30,11 +39,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Pending codes expire (prevents replay of stale code hashes).
+    if (conn.codeExpiresAt && conn.codeExpiresAt.getTime() < Date.now()) {
+      await prisma.telegramConnection.update({
+        where: { userId: session.userId },
+        data: {
+          phoneCodeHash: null,
+          codeExpiresAt: null,
+          connectionStatus: "DISCONNECTED",
+        },
+      });
+      return NextResponse.json(
+        { error: "This code has expired. Please request a new one." },
+        { status: 400 }
+      );
+    }
+
     const telegramService = await getTelegramService();
     const result = await telegramService.signIn({
       phoneNumber: conn.phoneNumber,
       phoneCodeHash: conn.phoneCodeHash,
       phoneCode: phoneCode.trim(),
+      userId: session.userId,
     });
 
     if (result.needs2FA) {
@@ -72,6 +98,7 @@ export async function POST(req: NextRequest) {
         connectionStatus: "CONNECTED",
         connectedAt: new Date(),
         phoneCodeHash: null,
+        codeExpiresAt: null,
       },
     });
 

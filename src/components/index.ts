@@ -6,6 +6,7 @@ export { default as FilesView } from "./FilesView";
 export { default as FileUploadModal } from "./FileUploadModal";
 export { default as Navbar } from "./Navbar";
 export { default as Sidebar } from "./Sidebar";
+export { default as MobileTabBar } from "./MobileTabBar";
 export { default as EmptyState } from "./EmptyState";
 export { default as LoadingSkeleton, FileGridSkeleton, FileTableSkeleton } from "./LoadingSkeleton";
 export { SidebarProvider, useSidebar } from "./SidebarContext";

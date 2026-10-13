@@ -41,12 +41,20 @@ enum UploadStatus {
   FAILED
 }
 
+enum ChunkUploadStatus {
+  UPLOADING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
 model User {
   id            String        @id @default(uuid())
   email         String        @unique
   passwordHash  String        @map("password_hash")
   name          String?
   accountStatus AccountStatus @default(ACTIVE) @map("account_status")
+  tokenVersion  Int           @default(0) @map("token_version")
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
@@ -54,6 +62,7 @@ model User {
   files              File[]
   fileTags           FileTag[]
   favorites          Favorite[]
+  chunkedUploads     ChunkedUpload[]
 
   @@map("users")
 }
@@ -67,6 +76,7 @@ model TelegramConnection {
   encryptedSessionReference  String?          @map("encrypted_session_reference")
   phoneNumber                String?          @map("phone_number")
   phoneCodeHash              String?          @map("phone_code_hash")
+  codeExpiresAt              DateTime?        @map("code_expires_at")
   connectionStatus           ConnectionStatus @default(DISCONNECTED) @map("connection_status")
   connectedAt                DateTime?        @map("connected_at")
   createdAt                  DateTime         @default(now()) @map("created_at")
@@ -90,12 +100,14 @@ model File {
   category              FileCategory @default(OTHER)
   uploadStatus          UploadStatus @default(PENDING) @map("upload_status")
   isFavorite            Boolean      @default(false) @map("is_favorite")
+  isChunked             Boolean      @default(false) @map("is_chunked")
   uploadedAt            DateTime     @default(now()) @map("uploaded_at")
   updatedAt             DateTime     @updatedAt @map("updated_at")
 
   owner     User       @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
   tags      FileTag[]
   favorites Favorite[]
+  chunkedUpload ChunkedUpload?
 
   @@index([ownerUserId, category])
   @@index([ownerUserId, uploadedAt])
@@ -131,4 +143,47 @@ model Favorite {
   @@unique([userId, fileId])
   @@index([userId])
   @@map("favorites")
+}
+
+// ChunkedUpload: a large file (>2GB Telegram single-file limit) split into
+// fixed-size chunks, each stored as its own Telegram Saved Messages document.
+// On completion a single logical File row (isChunked=true) is created and
+// linked here; downloads reassemble chunks in index order.
+model ChunkedUpload {
+  id          String            @id @default(uuid())
+  ownerUserId String            @map("owner_user_id")
+  fileName    String            @map("file_name")
+  mimeType    String            @map("mime_type")
+  totalSize   BigInt            @map("total_size")
+  chunkSize   Int               @map("chunk_size")
+  totalChunks Int               @map("total_chunks")
+  fingerprint String            @map("fingerprint")
+  status      ChunkUploadStatus @default(UPLOADING)
+  fileId      String?           @unique @map("file_id")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  owner  User      @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  file   File?     @relation(fields: [fileId], references: [id], onDelete: SetNull)
+  chunks FileChunk[]
+
+  @@index([ownerUserId, status])
+  @@index([ownerUserId, fingerprint])
+  @@map("chunked_uploads")
+}
+
+model FileChunk {
+  id                    String   @id @default(uuid())
+  uploadId              String   @map("upload_id")
+  chunkIndex            Int      @map("chunk_index")
+  telegramMessageId     Int      @map("telegram_message_id")
+  telegramFileReference String?  @map("telegram_file_reference")
+  size                  BigInt   @map("size")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  upload ChunkedUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  @@unique([uploadId, chunkIndex])
+  @@index([uploadId])
+  @@map("file_chunks")
 }
