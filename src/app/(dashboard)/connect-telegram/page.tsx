@@ -334,7 +334,7 @@ export default function ConnectTelegramPage() {
                       className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-500"
                     />
                   </div>
-                  <p className="text-[11px] text-neutral-500 mt-1">
+                  <p className="text-xs text-neutral-500 mt-1">
                     Include country code (+1 for US, +91 for India, +44 for UK, etc.)
                   </p>
                 </div>
@@ -342,7 +342,7 @@ export default function ConnectTelegramPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 text-black font-semibold py-3 rounded-xl shadow-md transition text-xs disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold py-3.5 rounded-xl shadow-lg shadow-brand-500/25 transition text-sm min-h-[48px] disabled:opacity-50"
                 >
                   {submitting ? (
                     <Loader2 className="w-4 h-4 animate-spin text-black" />
@@ -393,7 +393,7 @@ export default function ConnectTelegramPage() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 text-black font-semibold py-2.5 rounded-xl shadow-md transition text-xs disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold py-3 rounded-xl shadow-lg shadow-brand-500/25 transition text-xs min-h-[48px] disabled:opacity-50"
                   >
                     {submitting ? (
                       <Loader2 className="w-4 h-4 animate-spin text-black" />
@@ -445,7 +445,7 @@ export default function ConnectTelegramPage() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 text-black font-semibold py-2.5 rounded-xl shadow-md transition text-xs disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold py-3 rounded-xl shadow-lg shadow-brand-500/25 transition text-xs min-h-[48px] disabled:opacity-50"
                   >
                     {submitting ? (
                       <Loader2 className="w-4 h-4 animate-spin text-black" />

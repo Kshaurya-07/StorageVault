@@ -89,7 +89,7 @@ function ForgotPasswordContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-neutral-100 flex items-center justify-center p-6 selection:bg-neutral-800 selection:text-white">
+    <div className="min-h-screen bg-ink-900 text-neutral-100 flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md">
         {/* Brand with 3D Vault Emblem */}
         <div className="text-center mb-8 flex flex-col items-center">
@@ -133,12 +133,12 @@ function ForgotPasswordContent() {
                 <KeyRound className="w-3.5 h-3.5" />
                 <span>Local Dev Reset Link:</span>
               </div>
-              <p className="text-[11px] text-neutral-400">
+              <p className="text-xs text-neutral-400">
                 Because no SMTP server is configured in dev, click below:
               </p>
               <Link
                 href={devResetUrl}
-                className="inline-block text-white hover:underline text-[11px] break-all"
+                className="inline-block text-white hover:underline text-xs break-all"
               >
                 {devResetUrl}
               </Link>
@@ -160,7 +160,7 @@ function ForgotPasswordContent() {
                     placeholder="alex@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-500 transition"
+                    className="w-full bg-ink-800 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-brand-500/60 focus:ring-1 focus:ring-brand-500/40 transition"
                   />
                 </div>
               </div>
@@ -168,7 +168,7 @@ function ForgotPasswordContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-2 flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-semibold py-3 rounded-xl shadow-md transition text-xs"
+                className="w-full mt-2 flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold py-3.5 rounded-xl shadow-lg shadow-brand-500/25 transition text-sm min-h-[48px]"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin text-black" />
@@ -193,7 +193,7 @@ function ForgotPasswordContent() {
                     placeholder="•••••••• (min 8 characters)"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-500 transition"
+                    className="w-full bg-ink-800 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-brand-500/60 focus:ring-1 focus:ring-brand-500/40 transition"
                   />
                 </div>
               </div>
@@ -211,7 +211,7 @@ function ForgotPasswordContent() {
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-500 transition"
+                    className="w-full bg-ink-800 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-brand-500/60 focus:ring-1 focus:ring-brand-500/40 transition"
                   />
                 </div>
               </div>
@@ -219,7 +219,7 @@ function ForgotPasswordContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-2 flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-semibold py-3 rounded-xl shadow-md transition text-xs"
+                className="w-full mt-2 flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold py-3.5 rounded-xl shadow-lg shadow-brand-500/25 transition text-sm min-h-[48px]"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin text-black" />
@@ -247,7 +247,7 @@ function ForgotPasswordContent() {
 
 export default function ForgotPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0a]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-ink-900" />}>
       <ForgotPasswordContent />
     </Suspense>
   );

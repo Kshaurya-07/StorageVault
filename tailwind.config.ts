@@ -12,6 +12,33 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        // Brand: Telegram blue accent — primary actions, active states, focus.
+        brand: {
+          200: "#A8DFFA",
+          300: "#7CD3F7",
+          400: "#54BDEF",
+          500: "#2AABEE",
+          600: "#1D99D6",
+          700: "#1780B3",
+        },
+        // Ink: deep blue-black app surfaces (page -> elevated).
+        ink: {
+          950: "#060A10",
+          900: "#0A0F16",
+          850: "#0D141D",
+          800: "#111927",
+          750: "#16202E",
+          700: "#1D2A40",
+        },
+        // Semantic file-category colors (icons, badges, charts).
+        cat: {
+          document: "#38BDF8",
+          image: "#34D399",
+          video: "#A78BFA",
+          audio: "#FBBF24",
+          archive: "#94A3B8",
+          other: "#9CA3AF",
+        },
         vault: {
           50: "#fafafa",
           100: "#f5f5f5",

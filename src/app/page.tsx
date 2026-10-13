@@ -71,7 +71,7 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-neutral-100 selection:bg-neutral-800 selection:text-white">
+    <div className="min-h-screen bg-ink-900 text-neutral-100">
       <Navbar />
 
       {/* Hero Section */}
@@ -84,8 +84,8 @@ export default function LandingPage() {
             {/* Left Hero Content */}
             <div className="lg:col-span-7 text-left space-y-6">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-semibold">
-                <Sparkles className="w-3.5 h-3.5 text-neutral-400" />
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-200 text-xs font-semibold">
+                <Sparkles className="w-3.5 h-3.5 text-brand-400" />
                 <span>Personal Telegram Sovereign Cloud</span>
               </div>
 
@@ -103,14 +103,14 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
                 <Link
                   href="/register"
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-black hover:bg-neutral-200 font-semibold px-8 py-3.5 rounded-xl shadow-xl shadow-black/40 hover:scale-[1.02] active:scale-[0.98] transition-all text-sm"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-brand-500 text-[#041620] hover:bg-brand-600 font-bold px-8 py-3.5 rounded-xl shadow-xl shadow-brand-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all text-sm min-h-[48px]"
                 >
                   Create StorageVault Free
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
                   href="/login"
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-800 font-semibold px-7 py-3.5 rounded-xl transition text-sm"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-ink-800 hover:bg-ink-700 text-neutral-200 border border-white/10 font-semibold px-7 py-3.5 rounded-xl transition text-sm min-h-[48px]"
                 >
                   Sign In to Vault
                 </Link>
@@ -147,7 +147,7 @@ export default function LandingPage() {
       <section id="security" className="py-20 border-b border-neutral-800/60 bg-neutral-950/40">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-3">
+            <h2 className="text-xs font-semibold text-brand-400 uppercase tracking-widest mb-3">
               True Tenant Isolation
             </h2>
             <h3 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mb-4">
@@ -173,19 +173,19 @@ export default function LandingPage() {
               </div>
               <div className="space-y-2 text-xs text-neutral-300 font-mono">
                 <div className="p-2.5 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-400" />
                   <span>StorageVault Account A (Argon2 / AES-256)</span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-400" />
                   <span>Telegram Account A (MTProto Client)</span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center gap-2 text-white font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-400" />
                   <span>Saved Messages A (Sovereign Cloud)</span>
                 </div>
               </div>
-              <p className="text-[11px] text-neutral-400 leading-relaxed">
+              <p className="text-xs text-neutral-400 leading-relaxed">
                 User A has cryptographic exclusivity. All queries are strictly scoped by <code>userId</code> in PostgreSQL.
               </p>
             </div>
@@ -203,19 +203,19 @@ export default function LandingPage() {
               </div>
               <div className="space-y-2 text-xs text-neutral-300 font-mono">
                 <div className="p-2.5 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-400" />
                   <span>StorageVault Account B (Argon2 / AES-256)</span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-400" />
                   <span>Telegram Account B (MTProto Client)</span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center gap-2 text-white font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-400" />
                   <span>Saved Messages B (Sovereign Cloud)</span>
                 </div>
               </div>
-              <p className="text-[11px] text-neutral-400 leading-relaxed">
+              <p className="text-xs text-neutral-400 leading-relaxed">
                 User B cannot access, read, or discover User A data. Zero leakage across tenant partitions.
               </p>
             </div>
@@ -227,7 +227,7 @@ export default function LandingPage() {
       <section id="timeline" className="py-24 border-b border-neutral-800/60">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-3">
+            <h2 className="text-xs font-semibold text-brand-400 uppercase tracking-widest mb-3">
               End-to-End Mechanics
             </h2>
             <h3 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mb-4">
@@ -248,7 +248,7 @@ export default function LandingPage() {
                 >
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 rounded-xl bg-neutral-800 flex items-center justify-center border border-neutral-700 text-white">
+                      <div className="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center border border-brand-500/30 text-brand-300">
                         <Icon className="w-5 h-5" />
                       </div>
                       <span className="text-2xl font-mono font-bold text-neutral-600">
@@ -272,7 +272,7 @@ export default function LandingPage() {
       <section id="features" className="py-20 border-b border-neutral-800/60 bg-neutral-950/30">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-3">
+            <h2 className="text-xs font-semibold text-brand-400 uppercase tracking-widest mb-3">
               Performance Pillars
             </h2>
             <h3 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mb-4">
@@ -285,7 +285,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800 hover:border-neutral-700 transition">
-              <div className="w-10 h-10 rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center mb-4 text-white">
+              <div className="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center mb-4 text-brand-300">
                 <Send className="w-5 h-5" />
               </div>
               <h4 className="text-base font-bold text-white mb-2">Saved Messages Storage</h4>
@@ -295,7 +295,7 @@ export default function LandingPage() {
             </div>
 
             <div className="p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800 hover:border-neutral-700 transition">
-              <div className="w-10 h-10 rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center mb-4 text-white">
+              <div className="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center mb-4 text-brand-300">
                 <Sparkles className="w-5 h-5" />
               </div>
               <h4 className="text-base font-bold text-white mb-2">Privacy-First AI Search</h4>
@@ -305,7 +305,7 @@ export default function LandingPage() {
             </div>
 
             <div className="p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800 hover:border-neutral-700 transition">
-              <div className="w-10 h-10 rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center mb-4 text-white">
+              <div className="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center mb-4 text-brand-300">
                 <EyeOff className="w-5 h-5" />
               </div>
               <h4 className="text-base font-bold text-white mb-2">Zero Host Disk Storage</h4>
@@ -318,7 +318,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Footer */}
-      <footer className="border-t border-neutral-800 bg-[#070707] py-14">
+      <footer className="border-t border-white/10 bg-ink-950 py-14">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-neutral-400">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center">
@@ -335,7 +335,7 @@ export default function LandingPage() {
             <Link href="/login" className="hover:text-white transition">
               Sign In
             </Link>
-            <Link href="/register" className="text-white hover:underline font-semibold">
+            <Link href="/register" className="text-brand-300 hover:text-brand-200 hover:underline font-semibold">
               Create StorageVault Account
             </Link>
           </div>

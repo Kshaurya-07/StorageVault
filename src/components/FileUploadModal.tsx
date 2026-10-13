@@ -178,14 +178,14 @@ export default function FileUploadModal({
             </div>
             <div>
               <h2 className="text-sm font-bold text-white">Upload to Saved Messages</h2>
-              <p className="text-[11px] text-neutral-400">
+              <p className="text-xs text-neutral-400">
                 Directly stream into your personal Telegram cloud storage
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -241,7 +241,7 @@ export default function FileUploadModal({
             <p className="text-xs font-semibold text-white">
               Drag and drop files here, or <span className="text-neutral-300 underline">browse</span>
             </p>
-            <p className="text-[11px] text-neutral-400 mt-1 font-mono">
+            <p className="text-xs text-neutral-400 mt-1 font-mono">
               Supports PDF, DOCX, Images, Videos, MP3, ZIP up to 2.0 GB per file
             </p>
           </div>
@@ -264,7 +264,7 @@ export default function FileUploadModal({
           {/* Queue List */}
           {queue.length > 0 && (
             <div className="space-y-2 pt-2">
-              <div className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider font-mono">
+              <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider font-mono">
                 Selected Files ({queue.length})
               </div>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
@@ -288,7 +288,7 @@ export default function FileUploadModal({
                     {/* Progress / Status */}
                     <div className="flex items-center gap-2 shrink-0">
                       {item.status === "uploading" && (
-                        <div className="flex items-center gap-2 text-white text-[11px] font-mono">
+                        <div className="flex items-center gap-2 text-white text-xs font-mono">
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
                           <span>{item.progress}%</span>
                         </div>
@@ -322,7 +322,7 @@ export default function FileUploadModal({
 
         {/* Modal Footer */}
         <div className="px-6 py-3.5 border-t border-neutral-800 bg-neutral-950 flex items-center justify-between">
-          <span className="text-[11px] text-neutral-400 font-mono">
+          <span className="text-xs text-neutral-400 font-mono">
             {queue.length} file(s) queued
           </span>
           <div className="flex items-center gap-2">
@@ -336,7 +336,7 @@ export default function FileUploadModal({
             <button
               onClick={startUpload}
               disabled={queue.length === 0 || isProcessing}
-              className="flex items-center gap-2 bg-white hover:bg-neutral-200 disabled:opacity-50 text-black text-xs font-semibold px-5 py-2 rounded-xl shadow-md transition"
+              className="flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold text-xs px-5 py-3 rounded-xl shadow-lg shadow-brand-500/25 transition min-h-[48px] w-full sm:w-auto"
             >
               {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />}
               <span>{isProcessing ? "Uploading..." : "Upload to Telegram"}</span>

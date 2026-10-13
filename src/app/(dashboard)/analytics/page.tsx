@@ -44,14 +44,14 @@ export default function AnalyticsPage() {
     );
   }
 
-  // Strict Monochrome Palette for category progression
+  // Semantic category palette — matches badges/icons across the app
   const categories = [
-    { key: "DOCUMENT", label: "Documents", barColor: "bg-white", text: "text-neutral-100" },
-    { key: "IMAGE", label: "Images", barColor: "bg-neutral-300", text: "text-neutral-200" },
-    { key: "VIDEO", label: "Videos", barColor: "bg-neutral-400", text: "text-neutral-300" },
-    { key: "AUDIO", label: "Audio", barColor: "bg-neutral-500", text: "text-neutral-400" },
-    { key: "ARCHIVE", label: "Archives", barColor: "bg-neutral-600", text: "text-neutral-400" },
-    { key: "OTHER", label: "Other", barColor: "bg-neutral-700", text: "text-neutral-500" },
+    { key: "DOCUMENT", label: "Documents", barColor: "bg-cat-document", text: "text-sky-300" },
+    { key: "IMAGE", label: "Images", barColor: "bg-cat-image", text: "text-emerald-300" },
+    { key: "VIDEO", label: "Videos", barColor: "bg-cat-video", text: "text-violet-300" },
+    { key: "AUDIO", label: "Audio", barColor: "bg-cat-audio", text: "text-amber-300" },
+    { key: "ARCHIVE", label: "Archives", barColor: "bg-cat-archive", text: "text-slate-300" },
+    { key: "OTHER", label: "Other", barColor: "bg-cat-other", text: "text-neutral-400" },
   ] as const;
 
   return (
@@ -96,7 +96,7 @@ export default function AnalyticsPage() {
                 <div className="text-2xl font-extrabold text-white">
                   {data?.formattedTotalSize || "0 Bytes"}
                 </div>
-                <div className="text-[11px] text-neutral-400 mt-2 font-mono">
+                <div className="text-xs text-neutral-400 mt-2 font-mono">
                   Saved Messages Storage
                 </div>
               </div>
@@ -111,7 +111,7 @@ export default function AnalyticsPage() {
                 <div className="text-2xl font-extrabold text-white">
                   {data?.totalFiles ?? 0}
                 </div>
-                <div className="text-[11px] text-neutral-400 mt-2 font-mono">
+                <div className="text-xs text-neutral-400 mt-2 font-mono">
                   PostgreSQL Metadata Index
                 </div>
               </div>
@@ -126,7 +126,7 @@ export default function AnalyticsPage() {
                 <div className="text-2xl font-extrabold text-white">
                   {data?.recentUploadsCount ?? 0}
                 </div>
-                <div className="text-[11px] text-neutral-400 mt-2 font-mono">
+                <div className="text-xs text-neutral-400 mt-2 font-mono">
                   New files synced
                 </div>
               </div>
@@ -214,7 +214,7 @@ export default function AnalyticsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-neutral-800 text-neutral-400 text-[11px] uppercase font-mono">
+                  <tr className="border-b border-neutral-800 text-neutral-400 text-xs uppercase font-mono">
                     <th className="py-2.5 px-3">Filename</th>
                     <th className="py-2.5 px-3">Category</th>
                     <th className="py-2.5 px-3">Size</th>

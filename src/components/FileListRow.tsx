@@ -13,7 +13,12 @@ import {
   Eye,
 } from "lucide-react";
 import { FileMetadata } from "@/lib/types";
-import { formatBytes, getCategoryBadgeColor } from "@/lib/fileCategories";
+import {
+  formatBytes,
+  getCategoryBadgeColor,
+  getCategoryIconClass,
+  getCategoryTileClass,
+} from "@/lib/fileCategories";
 
 interface FileListRowProps {
   file: FileMetadata;
@@ -29,19 +34,22 @@ export default function FileListRow({
   onToggleFavorite,
 }: FileListRowProps) {
   const getCategoryIcon = (category: string) => {
+    const color = getCategoryIconClass(
+      category as "DOCUMENT" | "IMAGE" | "VIDEO" | "AUDIO" | "ARCHIVE" | "OTHER"
+    );
     switch (category) {
       case "DOCUMENT":
-        return <FileText className="w-4 h-4 text-neutral-200" />;
+        return <FileText className={`w-4 h-4 ${color}`} />;
       case "IMAGE":
-        return <ImageIcon className="w-4 h-4 text-neutral-200" />;
+        return <ImageIcon className={`w-4 h-4 ${color}`} />;
       case "VIDEO":
-        return <Video className="w-4 h-4 text-neutral-200" />;
+        return <Video className={`w-4 h-4 ${color}`} />;
       case "AUDIO":
-        return <Music className="w-4 h-4 text-neutral-200" />;
+        return <Music className={`w-4 h-4 ${color}`} />;
       case "ARCHIVE":
-        return <Archive className="w-4 h-4 text-neutral-200" />;
+        return <Archive className={`w-4 h-4 ${color}`} />;
       default:
-        return <File className="w-4 h-4 text-neutral-400" />;
+        return <File className={`w-4 h-4 ${color}`} />;
     }
   };
 
@@ -51,7 +59,7 @@ export default function FileListRow({
     <tr className="border-b border-neutral-800/80 hover:bg-neutral-900/60 transition group text-xs">
       <td className="py-3 px-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800">
+          <div className={`p-2 rounded-lg border shrink-0 ${getCategoryTileClass(file.category)}`}>
             {getCategoryIcon(file.category)}
           </div>
           <div className="min-w-0">
