@@ -123,6 +123,14 @@ export default function FileCard({
               >
                 {file.displayFilename}
               </h3>
+              {file.isChunked && (
+                <span
+                  className="shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-brand-500/15 text-brand-300 border border-brand-500/30"
+                  title="Large file stored in multiple parts — downloads as one file"
+                >
+                  chunked
+                </span>
+              )}
               {onRename && (
                 <button
                   onClick={() => setIsRenaming(true)}

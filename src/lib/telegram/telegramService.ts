@@ -64,6 +64,16 @@ export interface ITelegramService {
     sessionString: string;
     messageId: number;
   }): Promise<DownloadResult>;
+  /**
+   * Streams a Saved Messages file as an async iterable of Buffer chunks.
+   * Nothing is buffered: used for chunked-file download reassembly where a
+   * whole file may be tens of GB. The caller must fully consume (or break
+   * out of) the iterator so the implementation can release its connection.
+   */
+  downloadStreamFromSavedMessages(params: {
+    sessionString: string;
+    messageId: number;
+  }): Promise<AsyncIterable<Buffer>>;
   deleteFromSavedMessages(params: {
     sessionString: string;
     messageId: number;

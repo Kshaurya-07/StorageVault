@@ -47,6 +47,7 @@ export interface FileMetadata {
   category: FileCategory;
   uploadStatus: UploadStatus;
   isFavorite: boolean;
+  isChunked?: boolean;
   uploadedAt: string;
   updatedAt: string;
   tags?: string[];

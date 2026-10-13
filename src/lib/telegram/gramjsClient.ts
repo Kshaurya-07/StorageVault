@@ -304,6 +304,63 @@ export class GramJsTelegramService implements ITelegramService {
     }
   }
 
+  /**
+   * Streaming download via gramjs `iterDownload`: yields the file in ~1MB
+   * pieces without ever holding the whole file in RAM. The MTProto client is
+   * disconnected when the iterator is exhausted or abandoned (try/finally on
+   * the async generator).
+   */
+  async downloadStreamFromSavedMessages(params: {
+    sessionString: string;
+    messageId: number;
+  }): Promise<AsyncIterable<Buffer>> {
+    const { sessionString, messageId } = params;
+    const { client } = await this.createClient(sessionString);
+
+    let messages: any;
+    try {
+      messages = await client.getMessages("me", { ids: [messageId] });
+    } catch (err: any) {
+      await client.disconnect().catch(() => {});
+      throw new Error(`Telegram download failed: ${err.message}`);
+    }
+    if (!messages || messages.length === 0 || !messages[0]?.media) {
+      await client.disconnect().catch(() => {});
+      throw new Error(`Message ${messageId} not found in Saved Messages or has no media`);
+    }
+    let media: any = messages[0].media;
+    // Unwrap MessageMediaDocument -> Document (same as gramjs internals).
+    const doc = media.document ? media.document : media;
+    if (!doc || !doc.id || !doc.accessHash) {
+      await client.disconnect().catch(() => {});
+      throw new Error(`Message ${messageId} has no downloadable document`);
+    }
+    // Full-file location (empty thumbSize = the file itself, not a thumbnail),
+    // mirroring gramjs' own _downloadDocument construction.
+    const location = new Api.InputDocumentFileLocation({
+      id: doc.id,
+      accessHash: doc.accessHash,
+      fileReference: doc.fileReference,
+      thumbSize: "",
+    });
+    const fileSize = typeof doc.size === "bigint" ? doc.size : BigInt(doc.size || 0);
+
+    async function* gen(): AsyncGenerator<Buffer> {
+      try {
+        for await (const chunk of client.iterDownload({
+          file: location,
+          fileSize,
+          requestSize: 1024 * 1024, // 1MB pieces, matching gramjs' own default
+        })) {
+          yield Buffer.from(chunk as Buffer);
+        }
+      } finally {
+        await client.disconnect().catch(() => {});
+      }
+    }
+    return gen();
+  }
+
   async deleteFromSavedMessages(params: {
     sessionString: string;
     messageId: number;

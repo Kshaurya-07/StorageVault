@@ -118,6 +118,7 @@ export async function GET(req: NextRequest) {
       category: f.category,
       uploadStatus: f.uploadStatus,
       isFavorite: f.isFavorite,
+      isChunked: f.isChunked,
       uploadedAt: f.uploadedAt.toISOString(),
       updatedAt: f.updatedAt.toISOString(),
       tags: f.tags.map((t) => t.tag),

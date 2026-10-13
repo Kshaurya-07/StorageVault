@@ -172,6 +172,29 @@ export class MockTelegramService implements ITelegramService {
     };
   }
 
+  /**
+   * Mock streaming download: yields the stored buffer in 64KB slices so
+   * chunked-reassembly code paths can be tested without buffering concerns.
+   */
+  async downloadStreamFromSavedMessages(params: {
+    sessionString: string;
+    messageId: number;
+  }): Promise<AsyncIterable<Buffer>> {
+    const { sessionString, messageId } = params;
+    const userStorage = this.userSavedMessages.get(sessionString);
+    if (!userStorage || !userStorage.has(messageId)) {
+      throw new Error(`MESSAGE_ID_INVALID: File not found in user's Telegram Saved Messages (id=${messageId})`);
+    }
+    const buf = userStorage.get(messageId)!.fileBuffer;
+    const SLICE = 64 * 1024;
+    async function* gen(): AsyncGenerator<Buffer> {
+      for (let off = 0; off < buf.length; off += SLICE) {
+        yield buf.subarray(off, Math.min(off + SLICE, buf.length));
+      }
+    }
+    return gen();
+  }
+
   async deleteFromSavedMessages(params: {
     sessionString: string;
     messageId: number;
