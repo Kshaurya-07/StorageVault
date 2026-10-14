@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import {
   X,
   UploadCloud,
@@ -13,89 +13,40 @@ import {
   RotateCcw,
   Ban,
   Layers,
+  Minimize2,
 } from "lucide-react";
 import { formatBytes } from "@/lib/fileCategories";
 import Link from "next/link";
-import {
-  shouldUseChunkedUpload,
-  uploadFileChunked,
-  uploadFileDirect,
-  CancelToken,
-  CancelledError,
-  listInterruptedUploads,
-  CHUNK_SIZE_BYTES,
-} from "@/lib/chunkedUploader";
+import { useUploadQueue } from "./UploadQueueContext";
 
-interface FileUploadModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-}
+/**
+ * Upload dialog — now a thin UI over the app-level UploadQueueProvider.
+ * Closing/minimizing NEVER cancels uploads: they keep running in the
+ * background and stay visible via the floating progress pill.
+ */
+export default function FileUploadModal() {
+  const {
+    isModalOpen,
+    closeModal,
+    items,
+    tags,
+    setTags,
+    addFiles,
+    startAll,
+    cancelItem,
+    retryItem,
+    removeItem,
+    clearFinished,
+    activeCount,
+    doneCount,
+    telegramNotConnected,
+    interrupted,
+  } = useUploadQueue();
 
-type ItemStatus = "queued" | "uploading" | "done" | "error" | "cancelled";
-
-interface QueueItem {
-  key: string;
-  file: File;
-  chunked: boolean;
-  status: ItemStatus;
-  progress: number; // 0-100
-  doneChunks: number;
-  totalChunks: number;
-  error?: string;
-  code?: string;
-  uploadId?: string;
-  cancelToken: CancelToken;
-}
-
-let keyCounter = 0;
-
-export default function FileUploadModal({
-  isOpen,
-  onClose,
-  onSuccess,
-}: FileUploadModalProps) {
   const [dragActive, setDragActive] = useState(false);
-  const [items, setItems] = useState<QueueItem[]>([]);
-  const [tags, setTags] = useState("");
-  const [telegramNotConnected, setTelegramNotConnected] = useState(false);
-  const [interrupted, setInterrupted] = useState<
-    Array<{ fingerprint: string; fileName: string; uploaded: number; totalChunks: number }>
-  >([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const itemsRef = useRef<QueueItem[]>([]);
-  itemsRef.current = items;
 
-  useEffect(() => {
-    if (isOpen) {
-      setInterrupted(listInterruptedUploads());
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  const patchItem = (key: string, patch: Partial<QueueItem>) => {
-    setItems((prev) => prev.map((it) => (it.key === key ? { ...it, ...patch } : it)));
-  };
-
-  const handleFiles = (incoming: FileList | null) => {
-    if (!incoming) return;
-    const fresh: QueueItem[] = Array.from(incoming).map((file) => {
-      const chunked = shouldUseChunkedUpload(file);
-      const totalChunks = chunked ? Math.ceil(file.size / CHUNK_SIZE_BYTES) : 1;
-      return {
-        key: `q-${Date.now()}-${keyCounter++}`,
-        file,
-        chunked,
-        status: "queued" as ItemStatus,
-        progress: 0,
-        doneChunks: 0,
-        totalChunks,
-        cancelToken: new CancelToken(),
-      };
-    });
-    setItems((prev) => [...prev, ...fresh]);
-  };
+  if (!isModalOpen) return null;
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -112,119 +63,13 @@ export default function FileUploadModal({
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFiles(e.dataTransfer.files);
+      addFiles(e.dataTransfer.files);
     }
   };
 
-  const startItem = (item: QueueItem) => {
-    const token = new CancelToken();
-    patchItem(item.key, {
-      status: "uploading",
-      progress: 0,
-      doneChunks: 0,
-      error: undefined,
-      code: undefined,
-      uploadId: undefined,
-      cancelToken: token,
-    });
-
-    const onError = (err: any) => {
-      if (err instanceof CancelledError || token.cancelled) {
-        patchItem(item.key, { status: "cancelled", progress: 0 });
-      } else {
-        if (err?.code === "TELEGRAM_NOT_CONNECTED") setTelegramNotConnected(true);
-        patchItem(item.key, {
-          status: "error",
-          error: err?.message || "Upload failed",
-          code: err?.code,
-        });
-      }
-      maybeFinish();
-    };
-
-    if (item.chunked) {
-      uploadFileChunked(
-        item.file,
-        token,
-        {
-          onProgress: (done, total) => {
-            patchItem(item.key, {
-              doneChunks: done,
-              totalChunks: total,
-              progress: total > 0 ? Math.round((done / total) * 100) : 0,
-            });
-          },
-          onUploadId: (uploadId) => patchItem(item.key, { uploadId }),
-        },
-        tags
-      ).then(
-        () => {
-          patchItem(item.key, { status: "done", progress: 100 });
-          maybeFinish();
-        },
-        onError
-      );
-    } else {
-      uploadFileDirect(item.file, tags, token, {
-        onProgress: (percent) => patchItem(item.key, { progress: percent }),
-      }).then(
-        () => {
-          patchItem(item.key, { status: "done", progress: 100 });
-          maybeFinish();
-        },
-        onError
-      );
-    }
-  };
-
-  const maybeFinish = () => {
-    // Refresh the file list shortly after any success, once the queue settles.
-    const current = itemsRef.current;
-    if (
-      current.some((it) => it.status === "done") &&
-      !current.some((it) => it.status === "uploading" || it.status === "queued")
-    ) {
-      setTimeout(() => onSuccess(), 700);
-    }
-  };
-
-  const startAll = () => {
-    setTelegramNotConnected(false);
-    const current = itemsRef.current;
-    current
-      .filter((it) => it.status === "queued" || it.status === "error")
-      .forEach((it) => startItem(it));
-  };
-
-  const cancelItem = async (item: QueueItem) => {
-    item.cancelToken.cancel();
-    if (item.uploadId) {
-      // Tell the server to stop accepting chunks for this session.
-      try {
-        await fetch("/api/files/chunks/cancel", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ uploadId: item.uploadId }),
-        });
-      } catch {
-        /* best effort */
-      }
-    }
-    patchItem(item.key, { status: "cancelled" });
-  };
-
-  const retryItem = (item: QueueItem) => {
-    startItem(item);
-  };
-
-  const removeItem = (key: string) => {
-    setItems((prev) => prev.filter((it) => it.key !== key));
-  };
-
-  const activeCount = items.filter(
-    (it) => it.status === "uploading" || it.status === "queued"
+  const finishedCount = items.filter(
+    (it) => it.status === "done" || it.status === "cancelled" || it.status === "error"
   ).length;
-  const doneCount = items.filter((it) => it.status === "done").length;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
@@ -242,17 +87,38 @@ export default function FileUploadModal({
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            {activeCount > 0 && (
+              <button
+                onClick={closeModal}
+                title="Minimize — uploads keep running in background"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition"
+                aria-label="Minimize"
+              >
+                <Minimize2 className="w-5 h-5" />
+              </button>
+            )}
+            <button
+              onClick={closeModal}
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-4">
+          {activeCount > 0 && (
+            <div className="p-3 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center gap-2.5">
+              <Loader2 className="w-4 h-4 animate-spin text-brand-300 shrink-0" />
+              <p className="text-xs text-neutral-300">
+                You can minimize this dialog — uploads keep running in the background.
+              </p>
+            </div>
+          )}
+
           {telegramNotConnected && (
             <div className="p-3.5 rounded-xl bg-neutral-900 border border-neutral-700 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-white shrink-0 mt-0.5" />
@@ -311,7 +177,7 @@ export default function FileUploadModal({
               type="file"
               multiple
               className="hidden"
-              onChange={(e) => handleFiles(e.target.files)}
+              onChange={(e) => addFiles(e.target.files)}
             />
             <div className="w-12 h-12 rounded-2xl bg-neutral-900 border border-neutral-750 mx-auto flex items-center justify-center mb-3">
               <UploadCloud className="w-6 h-6 text-white" />
@@ -347,7 +213,17 @@ export default function FileUploadModal({
                   Upload Queue ({items.length})
                   {doneCount > 0 && <span className="text-brand-400"> · {doneCount} done</span>}
                 </span>
-                <span className="normal-case font-sans">3 parallel uploads</span>
+                <div className="flex items-center gap-3">
+                  <span className="normal-case font-sans">3 parallel uploads</span>
+                  {finishedCount > 0 && (
+                    <button
+                      onClick={clearFinished}
+                      className="normal-case font-sans text-neutral-500 hover:text-white transition"
+                    >
+                      Clear finished
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                 {items.map((item) => (
@@ -470,10 +346,10 @@ export default function FileUploadModal({
           </span>
           <div className="flex items-center gap-2">
             <button
-              onClick={onClose}
+              onClick={closeModal}
               className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900 transition min-h-[44px]"
             >
-              Close
+              {activeCount > 0 ? "Minimize" : "Close"}
             </button>
             <button
               onClick={startAll}

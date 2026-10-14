@@ -18,9 +18,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       connected: conn?.connectionStatus === "CONNECTED",
       status: conn?.connectionStatus || "DISCONNECTED",
-      telegramUserId: conn?.telegramUserId || null,
-      telegramUsername: conn?.telegramUsername || null,
-      telegramFirstName: conn?.telegramFirstName || null,
+      // Field names match /api/auth/me's `telegram` object so all pages
+      // can read `.username` consistently (previously `telegramUsername`,
+      // which every frontend read as undefined).
+      username: conn?.telegramUsername || null,
+      userId: conn?.telegramUserId || null,
+      firstName: conn?.telegramFirstName || null,
       phoneNumber: conn?.phoneNumber ? conn.phoneNumber.replace(/(\d{3})\d+(\d{4})/, "$1****$2") : null,
       connectedAt: conn?.connectedAt?.toISOString() || null,
     });

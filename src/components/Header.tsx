@@ -13,8 +13,8 @@ import {
   AlertCircle,
   Menu,
 } from "lucide-react";
-import FileUploadModal from "./FileUploadModal";
 import { useSidebar } from "./SidebarContext";
+import { useUploadQueue } from "./UploadQueueContext";
 
 export default function Header({
   onSearch,
@@ -27,8 +27,8 @@ export default function Header({
 }) {
   const router = useRouter();
   const { toggle } = useSidebar();
+  const { openModal } = useUploadQueue();
   const [searchVal, setSearchVal] = useState("");
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [user, setUser] = useState<{ name?: string; email: string } | null>(null);
   const [tgStatus, setTgStatus] = useState<{
     connected: boolean;
@@ -49,10 +49,17 @@ export default function Header({
 
   // Mobile bottom tab bar dispatches this to open the shared upload modal.
   useEffect(() => {
-    const open = () => setIsUploadOpen(true);
-    window.addEventListener("vault:open-upload", open);
-    return () => window.removeEventListener("vault:open-upload", open);
-  }, []);
+    window.addEventListener("vault:open-upload", openModal);
+    return () => window.removeEventListener("vault:open-upload", openModal);
+  }, [openModal]);
+
+  // The app-level queue fires this when uploads settle — refresh the list.
+  useEffect(() => {
+    if (!onUploadSuccess) return;
+    const refresh = () => onUploadSuccess();
+    window.addEventListener("vault:uploads-complete", refresh);
+    return () => window.removeEventListener("vault:uploads-complete", refresh);
+  }, [onUploadSuccess]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,7 +127,7 @@ export default function Header({
 
           {/* Upload Button — icon-only on phones, labeled on sm+ */}
           <button
-            onClick={() => setIsUploadOpen(true)}
+            onClick={openModal}
             className="flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-[#041620] text-xs font-bold min-w-[44px] min-h-[44px] px-3 sm:px-4 rounded-xl shadow-lg shadow-brand-500/25 transition"
           >
             <Upload className="w-4 h-4" strokeWidth={2.5} />
@@ -138,17 +145,6 @@ export default function Header({
         </div>
       </header>
 
-      {/* File Upload Modal */}
-      {isUploadOpen && (
-        <FileUploadModal
-          isOpen={isUploadOpen}
-          onClose={() => setIsUploadOpen(false)}
-          onSuccess={() => {
-            setIsUploadOpen(false);
-            if (onUploadSuccess) onUploadSuccess();
-          }}
-        />
-      )}
     </>
   );
 }
