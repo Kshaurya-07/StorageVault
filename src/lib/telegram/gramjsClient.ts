@@ -11,6 +11,33 @@ import {
 } from "./telegramService";
 
 /**
+ * Races a promise against a timer so network operations can never hang
+ * forever. The underlying promise keeps running (it cannot be cancelled),
+ * but the caller gets a proper error instead of an infinite hang.
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(
+      () => reject(new Error(`${label} timed out after ${Math.round(ms / 1000)}s`)),
+      ms
+    );
+  });
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
+/**
+ * Upload bound scaled by file size: 10s per MB, minimum 90s (small files
+ * fail fast instead of hanging), maximum 15 minutes (large files get room).
+ */
+function uploadTimeoutMs(sizeBytes: number): number {
+  const scaled = Math.ceil(sizeBytes / (1024 * 1024)) * 10_000;
+  return Math.min(Math.max(scaled, 90_000), 15 * 60_000);
+}
+
+/**
  * GramJsTelegramService: Real Telegram MTProto implementation.
  * Connects to Telegram's actual MTProto servers as a user client,
  * enabling direct, end-to-end access to the user's personal Saved Messages.
@@ -85,7 +112,9 @@ export class GramJsTelegramService implements ITelegramService {
       connectionRetries: 3,
       useWSS: false,
     });
-    await client.connect();
+    // connect() can hang indefinitely on flaky networks — bound it so a
+    // stalled handshake surfaces as an error instead of hanging the request.
+    await withTimeout(client.connect(), 30_000, "Telegram connect");
     return { client, session };
   }
 
@@ -252,12 +281,23 @@ export class GramJsTelegramService implements ITelegramService {
       const customFile = new CustomFile(fileName, size, filePath ?? "", fileBuffer);
 
       // In Telegram MTProto, "me" routes directly to the user's personal Saved Messages
-      const result: any = await client.sendFile("me", {
-        file: customFile,
-        caption: `StorageVault: ${fileName}`,
-        forceDocument: true,
-        workers: 1,
-      });
+      //
+      // TIMEOUT: gramjs' internal upload loop retries a failed sender FOREVER
+      // (its UPLOAD_TIMEOUT constant is defined but never used). Without our
+      // own bound, a stalled network hangs this await indefinitely and the
+      // HTTP request never completes ("1 uploading…" forever). Scale the
+      // bound with file size so large uploads get room but small ones fail
+      // fast with a retryable error.
+      const result: any = await withTimeout(
+        client.sendFile("me", {
+          file: customFile,
+          caption: `StorageVault: ${fileName}`,
+          forceDocument: true,
+          workers: 1,
+        }),
+        uploadTimeoutMs(size),
+        "Telegram upload"
+      );
 
       await client.disconnect();
 
