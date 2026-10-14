@@ -26,14 +26,14 @@ export default function Navbar() {
           <Link href="#features" className="hover:text-white transition-colors">
             Features
           </Link>
-          <Link href="#timeline" className="hover:text-white transition-colors">
-            Architecture
+          <Link href="#how-it-works" className="hover:text-white transition-colors">
+            How It Works
           </Link>
           <Link href="#security" className="hover:text-white transition-colors">
-            Zero-Knowledge
+            Security
           </Link>
-          <Link href="/privacy" className="hover:text-white transition-colors">
-            Security Specs
+          <Link href="#ai-search" className="hover:text-white transition-colors">
+            AI Search
           </Link>
         </nav>
 

@@ -16,13 +16,7 @@ import {
   Edit2,
 } from "lucide-react";
 import { FileMetadata } from "@/lib/types";
-import { FileCategory } from "@/lib/types";
-import {
-  formatBytes,
-  getCategoryBadgeColor,
-  getCategoryIconClass,
-  getCategoryTileClass,
-} from "@/lib/fileCategories";
+import { formatBytes, getCategoryBadgeColor } from "@/lib/fileCategories";
 
 interface FileCardProps {
   file: FileMetadata;
@@ -30,25 +24,6 @@ interface FileCardProps {
   onDelete: (id: string) => void;
   onToggleFavorite: (id: string, current: boolean) => void;
   onRename?: (id: string, newName: string) => void;
-}
-
-function CategoryIcon({ category, className }: { category: FileCategory; className?: string }) {
-  const color = getCategoryIconClass(category);
-  const cls = `w-7 h-7 ${color} ${className || ""}`;
-  switch (category) {
-    case "DOCUMENT":
-      return <FileText className={cls} />;
-    case "IMAGE":
-      return <ImageIcon className={cls} />;
-    case "VIDEO":
-      return <Video className={cls} />;
-    case "AUDIO":
-      return <Music className={cls} />;
-    case "ARCHIVE":
-      return <Archive className={cls} />;
-    default:
-      return <File className={cls} />;
-  }
 }
 
 export default function FileCard({
@@ -61,9 +36,24 @@ export default function FileCard({
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(file.displayFilename);
 
-  // Direct download link (anchor with download attr) instead of window.open:
-  // same-tab navigation keeps auth cookies and can't be abused as a popup.
   const downloadHref = `/api/files/${file.id}/download`;
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "DOCUMENT":
+        return <FileText className="w-7 h-7 text-neutral-200" />;
+      case "IMAGE":
+        return <ImageIcon className="w-7 h-7 text-neutral-200" />;
+      case "VIDEO":
+        return <Video className="w-7 h-7 text-neutral-200" />;
+      case "AUDIO":
+        return <Music className="w-7 h-7 text-neutral-200" />;
+      case "ARCHIVE":
+        return <Archive className="w-7 h-7 text-neutral-200" />;
+      default:
+        return <File className="w-7 h-7 text-neutral-400" />;
+    }
+  };
 
   const handleRenameSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,143 +66,135 @@ export default function FileCard({
   const badgeColors = getCategoryBadgeColor(file.category);
 
   return (
-    <div className="glass-card rounded-2xl p-4 flex flex-col gap-3 group">
-      {/* Header row: icon tile + name/meta + favorite */}
-      <div className="flex items-start gap-3">
-        <div
-          onClick={() => onPreview(file)}
-          className={`w-12 h-12 rounded-xl border flex items-center justify-center cursor-pointer shrink-0 transition group-hover:scale-105 ${getCategoryTileClass(
-            file.category
-          )}`}
-          role="button"
-          aria-label={`Preview ${file.displayFilename}`}
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") onPreview(file);
-          }}
-        >
-          <CategoryIcon category={file.category} />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          {isRenaming ? (
-            <form onSubmit={handleRenameSubmit} className="flex items-center gap-1">
-              <input
-                type="text"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                autoFocus
-                onBlur={() => setIsRenaming(false)}
-                className="bg-ink-800 border border-brand-500/50 rounded-lg px-2 py-1.5 text-sm text-white w-full focus:outline-none"
-                aria-label="New file name"
-              />
-              <button
-                type="submit"
-                className="text-brand-300 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                aria-label="Confirm rename"
-              >
-                <Check className="w-4 h-4" />
-              </button>
-            </form>
-          ) : (
-            <div className="flex items-center gap-1">
-              <h3
-                onClick={() => onPreview(file)}
-                className="text-sm font-semibold text-white truncate cursor-pointer hover:text-brand-300 transition flex-1 min-w-0"
-                title={file.displayFilename}
-              >
-                {file.displayFilename}
-              </h3>
-              {file.isChunked && (
-                <span
-                  className="shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-brand-500/15 text-brand-300 border border-brand-500/30"
-                  title="Large file stored in multiple parts — downloads as one file"
-                >
-                  chunked
-                </span>
-              )}
-              {onRename && (
-                <button
-                  onClick={() => setIsRenaming(true)}
-                  className="text-neutral-500 hover:text-neutral-300 p-2 shrink-0"
-                  title="Rename file"
-                  aria-label={`Rename ${file.displayFilename}`}
-                >
-                  <Edit2 className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-          )}
-
-          <div className="flex items-center gap-2 mt-1">
+    <div className="glass-card rounded-2xl p-4 flex flex-col justify-between group relative overflow-hidden transform-gpu hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/80 hover:border-neutral-600 transition-all duration-300">
+      {/* Top Bar: Category badge, chunked badge & Favorite toggle */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-1.5">
+          <span
+            className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border uppercase tracking-wide ${badgeColors.bg} ${badgeColors.text} ${badgeColors.border}`}
+          >
+            {file.category}
+          </span>
+          {file.isChunked && (
             <span
-              className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border uppercase tracking-wide ${badgeColors.bg} ${badgeColors.text} ${badgeColors.border}`}
+              className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-300 border border-neutral-700"
+              title="Large file stored across MTProto chunks"
             >
-              {file.category}
+              CHUNKED
             </span>
-            <span className="text-xs text-neutral-400 font-mono">
-              {formatBytes(file.fileSizeBytes)}
-            </span>
-            <span className="text-xs text-neutral-500">
-              {new Date(file.uploadedAt).toLocaleDateString()}
-            </span>
-          </div>
+          )}
         </div>
 
-        {/* Favorite — always visible, 44px target */}
         <button
           onClick={() => onToggleFavorite(file.id, file.isFavorite)}
-          className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl transition shrink-0 ${
+          className={`min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl transition ${
             file.isFavorite
-              ? "text-amber-300 hover:text-amber-200"
-              : "text-neutral-500 hover:text-amber-300 hover:bg-white/5"
+              ? "text-white hover:text-neutral-300"
+              : "text-neutral-500 hover:text-white hover:bg-white/5"
           }`}
           title={file.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
           aria-label={file.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-          aria-pressed={file.isFavorite}
         >
-          <Star className={`w-5 h-5 ${file.isFavorite ? "fill-amber-300" : ""}`} />
+          <Star className={`w-4 h-4 ${file.isFavorite ? "fill-white" : ""}`} />
         </button>
       </div>
 
-      {/* Tags */}
-      {file.tags && file.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {file.tags.slice(0, 4).map((t, idx) => (
-            <span
-              key={idx}
-              className="text-xs bg-white/5 text-neutral-300 px-2 py-0.5 rounded-md border border-white/10"
-            >
-              #{t}
-            </span>
-          ))}
-        </div>
-      )}
+      {/* Center 3D Layered Thumbnail Area */}
+      <div
+        onClick={() => onPreview(file)}
+        className="h-28 rounded-xl bg-neutral-900/80 border border-neutral-800 flex flex-col items-center justify-center cursor-pointer hover:bg-neutral-850 hover:border-neutral-600 transition mb-3 relative overflow-hidden group/thumb"
+      >
+        <div className="absolute w-12 h-14 bg-neutral-800/40 rounded-lg border border-neutral-700/40 -rotate-6 translate-x-1 -translate-y-1 pointer-events-none group-hover/thumb:-rotate-12 group-hover/thumb:-translate-x-2 transition-transform duration-300" />
+        <div className="absolute w-12 h-14 bg-neutral-800/60 rounded-lg border border-neutral-700/60 rotate-6 -translate-x-1 translate-y-1 pointer-events-none group-hover/thumb:rotate-12 group-hover/thumb:translate-x-2 transition-transform duration-300" />
 
-      {/* Action bar — always visible, 44px touch targets */}
-      <div className="grid grid-cols-3 gap-2 pt-1 border-t border-white/[0.07]">
-        <button
-          onClick={() => onPreview(file)}
-          className="flex items-center justify-center gap-1.5 min-h-[44px] rounded-xl text-xs font-semibold text-neutral-300 hover:text-white hover:bg-white/[0.07] active:bg-white/10 transition"
-        >
-          <Eye className="w-4 h-4" />
-          <span>Preview</span>
-        </button>
-        <a
-          href={downloadHref}
-          download={file.displayFilename}
-          className="flex items-center justify-center gap-1.5 min-h-[44px] rounded-xl text-xs font-semibold text-brand-300 hover:text-brand-200 hover:bg-brand-500/10 active:bg-brand-500/20 transition"
-        >
-          <Download className="w-4 h-4" />
-          <span>Download</span>
-        </a>
-        <button
-          onClick={() => onDelete(file.id)}
-          className="flex items-center justify-center gap-1.5 min-h-[44px] rounded-xl text-xs font-semibold text-neutral-400 hover:text-red-300 hover:bg-red-500/10 active:bg-red-500/20 transition"
-        >
-          <Trash2 className="w-4 h-4" />
-          <span>Delete</span>
-        </button>
+        <div className="relative z-10 p-3 rounded-2xl bg-neutral-800 border border-neutral-700 shadow-lg group-hover/thumb:scale-105 transition-transform">
+          {getCategoryIcon(file.category)}
+        </div>
+        <span className="relative z-10 text-[10px] text-neutral-400 mt-2 font-mono">Preview Asset</span>
+      </div>
+
+      {/* File Info */}
+      <div className="space-y-2">
+        {isRenaming ? (
+          <form onSubmit={handleRenameSubmit} className="flex items-center gap-1">
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              autoFocus
+              onBlur={() => setIsRenaming(false)}
+              className="bg-neutral-900 border border-neutral-600 rounded px-2 py-1 text-xs text-white w-full focus:outline-none"
+            />
+            <button type="submit" className="text-white p-1 min-h-[36px] min-w-[36px] flex items-center justify-center">
+              <Check className="w-3.5 h-3.5" />
+            </button>
+          </form>
+        ) : (
+          <div className="flex items-center justify-between gap-1 group/title">
+            <h3
+              onClick={() => onPreview(file)}
+              className="text-xs font-semibold text-white truncate cursor-pointer hover:underline transition flex-1 min-w-0"
+              title={file.displayFilename}
+            >
+              {file.displayFilename}
+            </h3>
+            {onRename && (
+              <button
+                onClick={() => setIsRenaming(true)}
+                className="text-neutral-500 hover:text-neutral-300 opacity-0 group-hover/title:opacity-100 p-1"
+                title="Rename file"
+                aria-label={`Rename ${file.displayFilename}`}
+              >
+                <Edit2 className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between text-[11px] text-neutral-400 font-mono">
+          <span>{formatBytes(file.fileSizeBytes)}</span>
+          <span>{new Date(file.uploadedAt).toLocaleDateString()}</span>
+        </div>
+
+        {/* Tags */}
+        {file.tags && file.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {file.tags.slice(0, 4).map((t, idx) => (
+              <span
+                key={idx}
+                className="text-[9px] bg-neutral-800 text-neutral-300 px-1.5 py-0.5 rounded border border-neutral-700 font-mono"
+              >
+                #{t}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Action Bar with min-h-[44px] accessible touch targets */}
+        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-neutral-800/80">
+          <button
+            onClick={() => onPreview(file)}
+            className="flex items-center justify-center gap-1.5 min-h-[44px] rounded-xl text-xs font-semibold text-neutral-300 hover:text-white hover:bg-neutral-800/60 transition"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span>Preview</span>
+          </button>
+          <a
+            href={downloadHref}
+            download={file.displayFilename}
+            className="flex items-center justify-center gap-1.5 min-h-[44px] rounded-xl text-xs font-semibold text-neutral-200 hover:text-white hover:bg-neutral-800/60 transition"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Download</span>
+          </a>
+          <button
+            onClick={() => onDelete(file.id)}
+            className="flex items-center justify-center gap-1.5 min-h-[44px] rounded-xl text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-800/60 transition"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Delete</span>
+          </button>
+        </div>
       </div>
     </div>
   );
