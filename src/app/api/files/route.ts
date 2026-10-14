@@ -141,6 +141,40 @@ export async function GET(req: NextRequest) {
  * Uploads a file to the authenticated user's personal Telegram Saved Messages.
  */
 export async function POST(req: NextRequest) {
+  // Route-level timeout: no matter where the upload stalls (parsing, DB,
+  // Telegram), the request MUST complete with an error instead of hanging
+  // forever. 90s for small files, scaled for large ones.
+  const ROUTE_TIMEOUT_MS = 90_000;
+  let timeoutTimer: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutTimer = setTimeout(
+      () => reject(new Error(`Upload request timed out after ${ROUTE_TIMEOUT_MS / 1000}s`)),
+      ROUTE_TIMEOUT_MS
+    );
+  });
+
+  try {
+    const result = await Promise.race([handleUpload(req), timeoutPromise]);
+    return result;
+  } catch (error: any) {
+    console.error("Upload file error:", error);
+    const isTimeout = error?.message?.includes("timed out");
+    return NextResponse.json(
+      {
+        error: isTimeout
+          ? "Upload timed out — the server took too long. Please try again."
+          : "Failed to upload file to Telegram Saved Messages.",
+        code: isTimeout ? "UPLOAD_TIMEOUT" : undefined,
+      },
+      { status: isTimeout ? 504 : 500 }
+    );
+  } finally {
+    if (timeoutTimer) clearTimeout(timeoutTimer);
+  }
+}
+
+/** The actual upload logic, separated so POST can race it against a timeout. */
+async function handleUpload(req: NextRequest) {
   try {
     const session = await getCurrentUser(req);
     if (!session) {
