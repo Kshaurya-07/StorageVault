@@ -229,6 +229,10 @@ async function uploadOneChunk(
     if (cancel.cancelled) throw new CancelledError();
     const controller = new AbortController();
     cancel.track(controller);
+    // Bound each chunk attempt: 5 min max per chunk request. Combined with
+    // the user's CancelToken signal so manual cancel still wins.
+    const chunkTimeout = AbortSignal.timeout(5 * 60_000);
+    const combined = AbortSignal.any([controller.signal, chunkTimeout]);
     try {
       const form = new FormData();
       form.append("uploadId", uploadId);
@@ -238,7 +242,7 @@ async function uploadOneChunk(
       const res = await fetch("/api/files/chunks", {
         method: "POST",
         body: form,
-        signal: controller.signal,
+        signal: combined,
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) return; // includes duplicate:true (idempotent retry)
@@ -406,6 +410,10 @@ export function uploadFileDirect(
       const xhr = new XMLHttpRequest();
       cancel.track(xhr);
       xhr.open("POST", "/api/files");
+      // Client-side safety net: if the server ever hangs (e.g. Telegram
+      // stall), give up after 15 min with a proper error instead of
+      // "uploading…" forever. The server has its own tighter timeout.
+      xhr.timeout = 15 * 60_000;
       xhr.upload.onprogress = (ev) => {
         if (ev.lengthComputable) {
           hooks.onProgress(Math.round((ev.loaded / ev.total) * 100));
@@ -431,6 +439,14 @@ export function uploadFileDirect(
       xhr.onerror = () => {
         cancel.untrack(xhr);
         reject(cancel.cancelled ? new CancelledError() : new Error("Network error during upload."));
+      };
+      xhr.ontimeout = () => {
+        cancel.untrack(xhr);
+        reject(
+          new Error(
+            "Upload timed out — the server took too long to respond. Please retry."
+          )
+        );
       };
       xhr.onabort = () => {
         cancel.untrack(xhr);
