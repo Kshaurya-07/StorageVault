@@ -285,7 +285,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={updatingPassword}
-              className="bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold text-xs px-5 py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-brand-500/25 min-h-[48px]"
+              className="bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-bold text-xs px-5 py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-lg min-h-[48px]"
             >
               {updatingPassword && <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />}
               <span>Update Password</span>

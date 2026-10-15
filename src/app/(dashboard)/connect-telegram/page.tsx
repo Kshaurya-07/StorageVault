@@ -342,7 +342,7 @@ export default function ConnectTelegramPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold py-3.5 rounded-xl shadow-lg shadow-brand-500/25 transition text-sm min-h-[48px] disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-bold py-3.5 rounded-xl shadow-lg transition text-sm min-h-[48px] disabled:opacity-50"
                 >
                   {submitting ? (
                     <Loader2 className="w-4 h-4 animate-spin text-black" />
@@ -393,7 +393,7 @@ export default function ConnectTelegramPage() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold py-3 rounded-xl shadow-lg shadow-brand-500/25 transition text-xs min-h-[48px] disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-bold py-3 rounded-xl shadow-lg transition text-xs min-h-[48px] disabled:opacity-50"
                   >
                     {submitting ? (
                       <Loader2 className="w-4 h-4 animate-spin text-black" />
@@ -445,7 +445,7 @@ export default function ConnectTelegramPage() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold py-3 rounded-xl shadow-lg shadow-brand-500/25 transition text-xs min-h-[48px] disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-bold py-3 rounded-xl shadow-lg transition text-xs min-h-[48px] disabled:opacity-50"
                   >
                     {submitting ? (
                       <Loader2 className="w-4 h-4 animate-spin text-black" />

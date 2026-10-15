@@ -111,8 +111,8 @@ export default function FileUploadModal() {
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-4">
           {activeCount > 0 && (
-            <div className="p-3 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center gap-2.5">
-              <Loader2 className="w-4 h-4 animate-spin text-brand-300 shrink-0" />
+            <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center gap-2.5">
+              <Loader2 className="w-4 h-4 animate-spin text-white shrink-0" />
               <p className="text-xs text-neutral-300">
                 You can minimize this dialog — uploads keep running in the background.
               </p>
@@ -142,8 +142,8 @@ export default function FileUploadModal() {
           )}
 
           {interrupted.length > 0 && (
-            <div className="p-3.5 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-start gap-3">
-              <Layers className="w-5 h-5 text-brand-400 shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-xl bg-neutral-900 border border-neutral-800 flex items-start gap-3">
+              <Layers className="w-5 h-5 text-white shrink-0 mt-0.5" />
               <div className="text-xs">
                 <span className="font-semibold text-white">
                   {interrupted.length} interrupted upload{interrupted.length > 1 ? "s" : ""} found
@@ -211,7 +211,7 @@ export default function FileUploadModal() {
               <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider font-mono flex items-center justify-between">
                 <span>
                   Upload Queue ({items.length})
-                  {doneCount > 0 && <span className="text-brand-400"> · {doneCount} done</span>}
+                  {doneCount > 0 && <span className="text-white"> · {doneCount} done</span>}
                 </span>
                 <div className="flex items-center gap-3">
                   <span className="normal-case font-sans">3 parallel uploads</span>
@@ -238,7 +238,7 @@ export default function FileUploadModal() {
                           <div className="text-white font-medium truncate flex items-center gap-1.5">
                             <span className="truncate">{item.file.name}</span>
                             {item.chunked && (
-                              <span className="shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-brand-500/15 text-brand-300 border border-brand-500/30">
+                              <span className="shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-300 border border-neutral-700">
                                 {item.totalChunks} parts
                               </span>
                             )}
@@ -256,7 +256,7 @@ export default function FileUploadModal() {
                       <div className="flex items-center gap-1.5 shrink-0">
                         {item.status === "uploading" && (
                           <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-300" />
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                             <span className="text-white font-mono text-xs w-10 text-right">
                               {item.progress}%
                             </span>
@@ -279,7 +279,7 @@ export default function FileUploadModal() {
                           </button>
                         )}
                         {item.status === "done" && (
-                          <CheckCircle className="w-4 h-4 text-brand-300" />
+                          <CheckCircle className="w-4 h-4 text-white" />
                         )}
                         {item.status === "cancelled" && (
                           <>
@@ -319,10 +319,10 @@ export default function FileUploadModal() {
                         <div
                           className={`h-full rounded-full transition-all ${
                             item.status === "done"
-                              ? "bg-brand-400"
+                              ? "bg-white"
                               : item.status === "error"
-                                ? "bg-red-400/70"
-                                : "bg-brand-500"
+                                ? "bg-neutral-500"
+                                : "bg-white"
                           }`}
                           style={{ width: `${item.progress}%` }}
                         />
@@ -354,7 +354,7 @@ export default function FileUploadModal() {
             <button
               onClick={startAll}
               disabled={items.length === 0 || activeCount > 0}
-              className="flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold text-xs px-5 py-3 rounded-xl shadow-lg shadow-brand-500/25 transition min-h-[48px]"
+              className="flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-bold text-xs px-5 py-3 rounded-xl shadow-lg shadow-black/40 transition min-h-[48px]"
             >
               <UploadCloud className="w-3.5 h-3.5" />
               <span>

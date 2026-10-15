@@ -9,8 +9,8 @@ export default function Navbar() {
       {/* min-w-0 + shrink handling: brand truncates, CTAs never wrap or overflow at 360px */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2">
         <Link href="/" className="flex items-center gap-2.5 group min-w-0 shrink">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-brand-500/15 border border-brand-500/40 flex items-center justify-center shadow-lg group-hover:border-brand-500/70 transition-colors shrink-0">
-            <HardDrive className="w-4 h-4 sm:w-5 sm:h-5 text-brand-400" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shadow-lg group-hover:border-white/40 transition-colors shrink-0">
+            <HardDrive className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
           <div className="flex flex-col min-w-0">
             <span className="font-bold text-base sm:text-xl tracking-tight text-white flex items-center gap-1.5 truncate">
@@ -46,7 +46,7 @@ export default function Navbar() {
           </Link>
           <Link
             href="/register"
-            className="text-xs sm:text-sm font-bold bg-brand-500 text-[#041620] hover:bg-brand-600 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-lg shadow-brand-500/25 flex items-center gap-1.5 sm:gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all min-h-[44px] whitespace-nowrap"
+            className="text-xs sm:text-sm font-bold bg-white text-black hover:bg-neutral-200 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-lg flex items-center gap-1.5 sm:gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all min-h-[44px] whitespace-nowrap"
           >
             Get Started
             <ArrowRight className="w-4 h-4" />

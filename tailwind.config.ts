@@ -12,32 +12,34 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        // Brand: Telegram blue accent — primary actions, active states, focus.
+        // Monochrome Brand tokens (strictly white/grayscale — ZERO blue)
         brand: {
-          200: "#A8DFFA",
-          300: "#7CD3F7",
-          400: "#54BDEF",
-          500: "#2AABEE",
-          600: "#1D99D6",
-          700: "#1780B3",
+          50: "#fafafa",
+          100: "#f5f5f5",
+          200: "#e5e5e5",
+          300: "#d4d4d4",
+          400: "#a3a3a3",
+          500: "#ffffff",
+          600: "#e5e5e5",
+          700: "#737373",
         },
-        // Ink: deep blue-black app surfaces (page -> elevated).
+        // Monochrome Ink surfaces (pure black -> dark charcoal)
         ink: {
-          950: "#060A10",
-          900: "#0A0F16",
-          850: "#0D141D",
-          800: "#111927",
-          750: "#16202E",
-          700: "#1D2A40",
+          950: "#000000",
+          900: "#0a0a0a",
+          850: "#111111",
+          800: "#171717",
+          750: "#1f1f1f",
+          700: "#262626",
         },
-        // Semantic file-category colors (icons, badges, charts).
+        // Monochrome semantic file-category tokens
         cat: {
-          document: "#38BDF8",
-          image: "#34D399",
-          video: "#A78BFA",
-          audio: "#FBBF24",
-          archive: "#94A3B8",
-          other: "#9CA3AF",
+          document: "#ffffff",
+          image: "#e5e5e5",
+          video: "#d4d4d4",
+          audio: "#a3a3a3",
+          archive: "#737373",
+          other: "#525252",
         },
         vault: {
           50: "#fafafa",
@@ -52,8 +54,6 @@ const config: Config = {
           900: "#171717",
           950: "#0a0a0a",
         },
-        // Non-standard intermediate neutrals used across the UI.
-        // Defined here so neutral-750/850 resolve to real classes.
         neutral: {
           750: "#2e2e2e",
           850: "#1c1c1c",

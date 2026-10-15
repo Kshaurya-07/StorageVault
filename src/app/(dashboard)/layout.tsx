@@ -15,7 +15,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <UploadQueueProvider>
-        <div className="min-h-screen bg-ink-900 text-neutral-100 flex relative overflow-x-hidden">
+        <div className="min-h-screen bg-[#0a0a0a] text-neutral-100 flex relative overflow-x-hidden">
           {/* Responsive Left Sidebar (drawer on mobile, fixed on desktop) */}
           <Sidebar />
 

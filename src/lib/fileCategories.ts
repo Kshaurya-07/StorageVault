@@ -104,78 +104,19 @@ export function getCategoryBadgeColor(category: FileCategory): {
   text: string;
   border: string;
 } {
-  switch (category) {
-    case "DOCUMENT":
-      return {
-        bg: "bg-sky-500/10",
-        text: "text-sky-300",
-        border: "border-sky-500/30",
-      };
-    case "IMAGE":
-      return {
-        bg: "bg-emerald-500/10",
-        text: "text-emerald-300",
-        border: "border-emerald-500/30",
-      };
-    case "VIDEO":
-      return {
-        bg: "bg-violet-500/10",
-        text: "text-violet-300",
-        border: "border-violet-500/30",
-      };
-    case "AUDIO":
-      return {
-        bg: "bg-amber-500/10",
-        text: "text-amber-300",
-        border: "border-amber-500/30",
-      };
-    case "ARCHIVE":
-      return {
-        bg: "bg-slate-500/10",
-        text: "text-slate-300",
-        border: "border-slate-500/30",
-      };
-    default:
-      return {
-        bg: "bg-neutral-500/10",
-        text: "text-neutral-300",
-        border: "border-neutral-500/30",
-      };
-  }
+  return {
+    bg: "bg-neutral-900",
+    text: "text-neutral-200",
+    border: "border-neutral-800",
+  };
 }
 
 /** Tailwind text-color class for a category's icon, from the theme palette. */
 export function getCategoryIconClass(category: FileCategory): string {
-  switch (category) {
-    case "DOCUMENT":
-      return "text-cat-document";
-    case "IMAGE":
-      return "text-cat-image";
-    case "VIDEO":
-      return "text-cat-video";
-    case "AUDIO":
-      return "text-cat-audio";
-    case "ARCHIVE":
-      return "text-cat-archive";
-    default:
-      return "text-cat-other";
-  }
+  return "text-neutral-200";
 }
 
 /** Soft tinted tile classes behind a category icon. */
 export function getCategoryTileClass(category: FileCategory): string {
-  switch (category) {
-    case "DOCUMENT":
-      return "bg-sky-500/10 border-sky-500/25";
-    case "IMAGE":
-      return "bg-emerald-500/10 border-emerald-500/25";
-    case "VIDEO":
-      return "bg-violet-500/10 border-violet-500/25";
-    case "AUDIO":
-      return "bg-amber-500/10 border-amber-500/25";
-    case "ARCHIVE":
-      return "bg-slate-500/10 border-slate-500/25";
-    default:
-      return "bg-neutral-500/10 border-neutral-500/25";
-  }
+  return "bg-neutral-900 border-neutral-800";
 }

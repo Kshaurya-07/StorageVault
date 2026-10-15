@@ -68,7 +68,7 @@ export default function FilePreviewModal({
             <a
               href={downloadUrl}
               download={file.originalFilename}
-              className="flex items-center justify-center gap-1.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-brand-500/25 transition min-h-[44px]"
+              className="flex items-center justify-center gap-1.5 bg-white hover:bg-neutral-200 text-black font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg transition min-h-[44px]"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Download</span>
@@ -128,7 +128,7 @@ export default function FilePreviewModal({
               <a
                 href={downloadUrl}
                 download={file.originalFilename}
-                className="inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-[#041620] font-bold text-xs px-5 py-3 rounded-xl transition shadow-lg shadow-brand-500/25 min-h-[48px]"
+                className="inline-flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 disabled:opacity-50 text-black font-bold text-xs px-5 py-3 rounded-xl transition shadow-lg shadow-black/40 min-h-[48px]"
               >
                 <Download className="w-4 h-4" />
                 Download Document ({formatBytes(file.fileSizeBytes)})
@@ -138,7 +138,7 @@ export default function FilePreviewModal({
         </div>
 
         {/* File Metadata Details Footer */}
-        <div className="p-5 border-t border-white/10 bg-ink-950 text-xs">
+        <div className="p-5 border-t border-neutral-800 bg-neutral-950 text-xs">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono">
             <div>
               <span className="text-[10px] text-neutral-500 block uppercase font-semibold">

@@ -118,9 +118,9 @@ export default function DashboardPage() {
       <main className="p-6 md:p-8 max-w-7xl mx-auto w-full space-y-8">
         {/* Telegram Connection Alert Banner */}
         {!tgStatus.connected && (
-          <div className="p-5 rounded-2xl bg-brand-500/[0.07] border border-brand-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="p-5 rounded-2xl bg-neutral-900 border border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3.5">
-              <div className="p-2.5 rounded-xl bg-brand-500/15 text-brand-300 border border-brand-500/30 shrink-0">
+              <div className="p-2.5 rounded-xl bg-neutral-800 text-white border border-neutral-700 shrink-0">
                 <Send className="w-5 h-5" />
               </div>
               <div>
@@ -135,7 +135,7 @@ export default function DashboardPage() {
             </div>
             <Link
               href="/connect-telegram"
-              className="inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 text-[#041620] font-bold px-5 py-3 rounded-xl text-xs transition shrink-0 shadow-lg shadow-brand-500/25 min-h-[44px]"
+              className="inline-flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 text-black font-bold px-5 py-3 rounded-xl text-xs transition shrink-0 shadow-lg shadow-black/40 min-h-[44px]"
             >
               <Send className="w-3.5 h-3.5" />
               <span>Connect Now</span>
@@ -146,7 +146,7 @@ export default function DashboardPage() {
         {/* 3D Spatial Volume & Storage Hero Row */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* 3D Drive Stack Interactive Scene */}
-          <div className="lg:col-span-5 rounded-2xl bg-ink-800/60 border border-white/10 p-5 flex flex-col justify-between">
+          <div className="lg:col-span-5 rounded-2xl bg-neutral-900/60 border border-neutral-800 p-5 flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-bold text-white">Sovereign Disk Array</h2>
@@ -169,7 +169,7 @@ export default function DashboardPage() {
             <div className="glass-card rounded-2xl p-5 flex flex-col justify-between">
               <div className="flex items-center justify-between text-neutral-400 text-xs mb-3">
                 <span>Indexed Vault Storage</span>
-                <HardDrive className="w-4 h-4 text-brand-400" />
+                <HardDrive className="w-4 h-4 text-white" />
               </div>
               <div>
                 <div className="text-2xl font-extrabold text-white">
@@ -185,7 +185,7 @@ export default function DashboardPage() {
             <div className="glass-card rounded-2xl p-5 flex flex-col justify-between">
               <div className="flex items-center justify-between text-neutral-400 text-xs mb-3">
                 <span>Total Indexed Files</span>
-                <FolderOpen className="w-4 h-4 text-brand-400" />
+                <FolderOpen className="w-4 h-4 text-white" />
               </div>
               <div>
                 <div className="text-2xl font-extrabold text-white">
@@ -201,7 +201,7 @@ export default function DashboardPage() {
             <Link href="/ai-search" className="glass-card rounded-2xl p-5 group flex flex-col justify-between">
               <div className="flex items-center justify-between text-neutral-400 text-xs mb-3">
                 <span>AI Search Engine</span>
-                <Sparkles className="w-4 h-4 text-brand-300 group-hover:scale-110 transition-transform" />
+                <Sparkles className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
               </div>
               <div>
                 <div className="text-sm font-bold text-white group-hover:underline transition">
@@ -221,7 +221,7 @@ export default function DashboardPage() {
             >
               <div className="flex items-center justify-between text-neutral-400 text-xs mb-3">
                 <span>Telegram Account</span>
-                <Send className="w-4 h-4 text-brand-300 group-hover:scale-110 transition-transform" />
+                <Send className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
               </div>
               <div>
                 <div className="text-sm font-bold text-white flex items-center gap-2">
@@ -245,21 +245,21 @@ export default function DashboardPage() {
         {/* Quick Navigation Categories */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {[
-            { label: "Documents", href: "/files/documents", count: analytics?.categoryCounts.DOCUMENT || 0, icon: FileText, color: "text-cat-document", tile: "bg-sky-500/10 border-sky-500/25" },
-            { label: "Images", href: "/files/images", count: analytics?.categoryCounts.IMAGE || 0, icon: ImageIcon, color: "text-cat-image", tile: "bg-emerald-500/10 border-emerald-500/25" },
-            { label: "Videos", href: "/files/videos", count: analytics?.categoryCounts.VIDEO || 0, icon: Video, color: "text-cat-video", tile: "bg-violet-500/10 border-violet-500/25" },
-            { label: "Audio", href: "/files/audio", count: analytics?.categoryCounts.AUDIO || 0, icon: Music, color: "text-cat-audio", tile: "bg-amber-500/10 border-amber-500/25" },
-            { label: "Archives", href: "/files/archives", count: analytics?.categoryCounts.ARCHIVE || 0, icon: Archive, color: "text-cat-archive", tile: "bg-slate-500/10 border-slate-500/25" },
+            { label: "Documents", href: "/files/documents", count: analytics?.categoryCounts.DOCUMENT || 0, icon: FileText },
+            { label: "Images", href: "/files/images", count: analytics?.categoryCounts.IMAGE || 0, icon: ImageIcon },
+            { label: "Videos", href: "/files/videos", count: analytics?.categoryCounts.VIDEO || 0, icon: Video },
+            { label: "Audio", href: "/files/audio", count: analytics?.categoryCounts.AUDIO || 0, icon: Music },
+            { label: "Archives", href: "/files/archives", count: analytics?.categoryCounts.ARCHIVE || 0, icon: Archive },
           ].map((cat) => {
             const CatIcon = cat.icon;
             return (
               <Link
                 key={cat.href}
                 href={cat.href}
-                className="p-4 rounded-2xl bg-ink-800/70 border border-white/10 hover:border-white/20 hover:bg-ink-750 transition group flex items-center gap-3 min-h-[76px]"
+                className="p-4 rounded-2xl bg-neutral-900/70 border border-neutral-800 hover:border-neutral-700 hover:bg-neutral-850 transition group flex items-center gap-3 min-h-[76px]"
               >
-                <span className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${cat.tile}`}>
-                  <CatIcon className={`w-5 h-5 ${cat.color}`} />
+                <span className="w-10 h-10 rounded-xl border border-neutral-800 bg-neutral-900 flex items-center justify-center shrink-0">
+                  <CatIcon className="w-5 h-5 text-neutral-200" />
                 </span>
                 <span className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold text-neutral-300 group-hover:text-white transition truncate">

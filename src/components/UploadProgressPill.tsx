@@ -23,17 +23,17 @@ export default function UploadProgressPill() {
 
   return (
     <div className="fixed bottom-20 lg:bottom-6 right-4 z-40 animate-fade-in">
-      <div className="flex items-center gap-3 pl-4 pr-2 py-2 rounded-2xl bg-ink-800/95 backdrop-blur-md border border-white/10 shadow-2xl shadow-black/50 min-w-[240px] max-w-[320px]">
+      <div className="flex items-center gap-3 pl-4 pr-2 py-2 rounded-2xl bg-neutral-900/95 backdrop-blur-md border border-neutral-800 shadow-2xl shadow-black/80 min-w-[240px] max-w-[320px]">
         <button
           onClick={openModal}
           className="flex items-center gap-3 flex-1 min-w-0 text-left"
           title="Open upload queue"
         >
-          <div className="w-9 h-9 rounded-xl bg-brand-500/15 border border-brand-500/30 flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
             {allDone ? (
-              <CheckCircle2 className="w-4 h-4 text-brand-300" />
+              <CheckCircle2 className="w-4 h-4 text-white" />
             ) : (
-              <Loader2 className="w-4 h-4 text-brand-300 animate-spin" />
+              <Loader2 className="w-4 h-4 text-white animate-spin" />
             )}
           </div>
           <div className="min-w-0 flex-1">
@@ -43,9 +43,9 @@ export default function UploadProgressPill() {
                 : `${activeCount} uploading… ${totalProgress}%`}
             </div>
             {!allDone && (
-              <div className="mt-1.5 h-1.5 rounded-full bg-white/10 overflow-hidden">
+              <div className="mt-1.5 h-1.5 rounded-full bg-neutral-800 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-brand-500 transition-all"
+                  className="h-full rounded-full bg-white transition-all"
                   style={{ width: `${totalProgress}%` }}
                 />
               </div>
@@ -60,7 +60,7 @@ export default function UploadProgressPill() {
         {allDone && (
           <button
             onClick={clearFinished}
-            className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-xl text-neutral-500 hover:text-white hover:bg-white/5 transition shrink-0"
+            className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-xl text-neutral-500 hover:text-white hover:bg-neutral-800 transition shrink-0"
             aria-label="Dismiss"
             title="Dismiss"
           >

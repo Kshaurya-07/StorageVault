@@ -8,9 +8,6 @@ import {
   Upload,
   Send,
   User as UserIcon,
-  ShieldCheck,
-  CheckCircle2,
-  AlertCircle,
   Menu,
 } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
@@ -72,11 +69,11 @@ export default function Header({
 
   return (
     <>
-      <header className="h-16 border-b border-white/10 bg-ink-900/90 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 gap-2">
+      <header className="h-16 border-b border-neutral-800 bg-[#0a0a0a]/90 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 gap-2">
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={toggle}
-            className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-ink-800 hover:bg-ink-700 text-neutral-300 hover:text-white border border-white/10 transition shrink-0"
+            className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 transition shrink-0"
             aria-label="Toggle navigation menu"
           >
             <Menu className="w-5 h-5" />
@@ -97,7 +94,7 @@ export default function Header({
             placeholder="Search by name, tag, or AI query (e.g. 'Show PDFs > 50MB')..."
             value={searchVal}
             onChange={(e) => setSearchVal(e.target.value)}
-            className="w-full bg-ink-800/90 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-brand-500/60 focus:ring-1 focus:ring-brand-500/40 transition"
+            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-500 focus:ring-1 focus:ring-neutral-500 transition"
           />
         </form>
 
@@ -106,13 +103,13 @@ export default function Header({
           {/* Telegram Status Pill */}
           <Link
             href="/connect-telegram"
-            className={`hidden md:flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium border transition min-h-[40px] ${
+            className={`hidden md:flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-medium border transition min-h-[40px] ${
               tgStatus.connected
-                ? "bg-brand-500/10 border-brand-500/40 text-brand-200 hover:bg-brand-500/20"
-                : "bg-ink-800/60 border-white/10 text-neutral-400 hover:bg-ink-700"
+                ? "bg-neutral-900 border-neutral-700 text-white hover:bg-neutral-850"
+                : "bg-neutral-900/60 border-neutral-800 text-neutral-400 hover:bg-neutral-850"
             }`}
           >
-            <Send className={`w-3.5 h-3.5 ${tgStatus.connected ? "text-brand-400" : "text-neutral-400"}`} />
+            <Send className={`w-3.5 h-3.5 ${tgStatus.connected ? "text-white" : "text-neutral-400"}`} />
             <span>
               {tgStatus.connected
                 ? `@${tgStatus.username || "Saved Messages"}`
@@ -120,7 +117,7 @@ export default function Header({
             </span>
             <div
               className={`w-2 h-2 rounded-full ${
-                tgStatus.connected ? "bg-brand-400 animate-pulse" : "bg-neutral-600"
+                tgStatus.connected ? "bg-white animate-pulse" : "bg-neutral-600"
               }`}
             />
           </Link>
@@ -128,7 +125,7 @@ export default function Header({
           {/* Upload Button — icon-only on phones, labeled on sm+ */}
           <button
             onClick={openModal}
-            className="flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-[#041620] text-xs font-bold min-w-[44px] min-h-[44px] px-3 sm:px-4 rounded-xl shadow-lg shadow-brand-500/25 transition"
+            className="flex items-center justify-center gap-2 bg-white hover:bg-neutral-200 active:scale-[0.98] text-black text-xs font-bold min-w-[44px] min-h-[44px] px-3 sm:px-4 rounded-xl shadow-lg shadow-black/40 transition"
           >
             <Upload className="w-4 h-4" strokeWidth={2.5} />
             <span className="hidden sm:inline">Upload File</span>
@@ -137,14 +134,13 @@ export default function Header({
           {/* User profile / avatar */}
           <Link
             href="/settings"
-            className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-ink-800 border border-white/10 flex items-center justify-center text-xs font-bold text-white hover:border-brand-500/50 transition"
+            className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs font-bold text-white hover:border-neutral-600 transition"
             title={user?.email || "Account"}
           >
             {user?.name ? user.name[0].toUpperCase() : user?.email ? user.email[0].toUpperCase() : <UserIcon className="w-4 h-4" />}
           </Link>
         </div>
       </header>
-
     </>
   );
 }

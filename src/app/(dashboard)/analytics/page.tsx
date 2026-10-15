@@ -44,14 +44,14 @@ export default function AnalyticsPage() {
     );
   }
 
-  // Semantic category palette — matches badges/icons across the app
+  // Semantic category palette — monochrome styling matching app design
   const categories = [
-    { key: "DOCUMENT", label: "Documents", barColor: "bg-cat-document", text: "text-sky-300" },
-    { key: "IMAGE", label: "Images", barColor: "bg-cat-image", text: "text-emerald-300" },
-    { key: "VIDEO", label: "Videos", barColor: "bg-cat-video", text: "text-violet-300" },
-    { key: "AUDIO", label: "Audio", barColor: "bg-cat-audio", text: "text-amber-300" },
-    { key: "ARCHIVE", label: "Archives", barColor: "bg-cat-archive", text: "text-slate-300" },
-    { key: "OTHER", label: "Other", barColor: "bg-cat-other", text: "text-neutral-400" },
+    { key: "DOCUMENT", label: "Documents", barColor: "bg-white", text: "text-neutral-200" },
+    { key: "IMAGE", label: "Images", barColor: "bg-neutral-300", text: "text-neutral-200" },
+    { key: "VIDEO", label: "Videos", barColor: "bg-neutral-400", text: "text-neutral-200" },
+    { key: "AUDIO", label: "Audio", barColor: "bg-neutral-500", text: "text-neutral-200" },
+    { key: "ARCHIVE", label: "Archives", barColor: "bg-neutral-600", text: "text-neutral-200" },
+    { key: "OTHER", label: "Other", barColor: "bg-neutral-700", text: "text-neutral-400" },
   ] as const;
 
   return (
