@@ -14,7 +14,7 @@ function getEncryptionKey(): Buffer {
     if (process.env.NODE_ENV === "production") {
       throw new Error("ENCRYPTION_KEY environment variable is required in production");
     }
-    return crypto.createHash("sha256").update("vault-ai-default-dev-key").digest();
+    return crypto.createHash("sha256").update("storagevault-default-dev-key").digest();
   }
 
   // If 64 hex characters (32 bytes hex)
