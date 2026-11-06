@@ -2,6 +2,10 @@
 
 A multi-user cloud storage platform that stores files in each user's own Telegram Saved Messages, using Telegram's MTProto API.
 
+Each user connects their own Telegram account. Files are stored in that account's private Saved Messages conversation, not routed through a shared bot or group chat.
+
+> Storage capacity and behaviour are subject to Telegram's API and account limits. StorageVault does not guarantee storage independent of those limits.
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -23,35 +27,50 @@ A multi-user cloud storage platform that stores files in each user's own Telegra
 
 ## Overview
 
-StorageVault is designed to give each user a private cloud drive without routing all users' files through a single shared bot or group chat. Each user connects their own Telegram account, and files are stored in that account's private Saved Messages conversation.
+StorageVault gives each user a private cloud drive built on the Telegram account they already own. The application stores file metadata in its own database and stores file content in the owner's Telegram Saved Messages.
 
-Key design principles described in the original README:
+### How it works
+
+1. A user creates an account and connects their own Telegram account through the in-app authorization flow.
+2. Uploads stream from the browser to the application server and onward to Telegram, without permanent copies on the server disk.
+3. Downloads stream back from Telegram on demand, scoped to the requesting owner.
+
+### Design principles
 
 1. **Personal storage:** Each user's files live in their own Telegram account, not in a shared account.
 2. **Tenant isolation:** File queries, searches, downloads, and tag lookups are scoped by owner, so one user cannot access another user's files.
-3. **Streaming uploads:** Uploads are streamed to Telegram rather than kept permanently on the application server's disk.
-4. **Resumable uploads:** Large files can be split into chunks and resumed.
-5. **Encrypted sessions:** Telegram session data is encrypted at rest using AES-256-GCM, as described in the original README.
-6. **Search without profiling:** Natural-language queries are translated into database filters, rather than used for model training or conversational profiling, as described in the original README.
-
-Storage limits and behaviour ultimately depend on Telegram's own API and account limits, so "unlimited" should not be read as a guarantee independent of those limits.
+3. **Streaming uploads:** Uploads stream to Telegram through ephemeral memory streams rather than being kept permanently on the application server's disk.
+4. **Resumable uploads:** Large files are split into chunks and can be resumed from the missing chunks.
+5. **Encrypted sessions:** Telegram session data is encrypted at rest using AES-256-GCM with random IVs.
+6. **Search without profiling:** Natural-language queries are translated into database filters. Queries and file metadata are not used for model training or conversational profiling.
 
 ## Features
 
-StorageVault includes workspaces for browsing, searching, and managing files, including:
-
-- Landing page, sign-in, registration, and password reset
+- Landing page, sign-in, registration, and password reset with signed, single-use reset links
 - Dashboard with storage metrics and recent uploads
 - Telegram connection wizard
 - File explorer with grid and list views, search, sorting, tags, and bulk actions
 - Filtered views for documents, images, videos, audio, and archives
 - Favorites and recent uploads
 - AI-assisted natural-language search
-- Storage analytics
+- Storage analytics by category and timeline
 - Account settings, including Telegram session management and account deletion
 - A privacy page describing the security model
 
-The interface uses a monochrome black-and-white theme with HTML5 canvas visual elements, as described in the original README.
+The interface uses a monochrome black-and-white theme with HTML5 canvas visual elements, including the Vault3DCore, NodeMesh3D, DataPillar3D, Shield3DVault, Bridge3DConduit, and VaultEmblem3D components. The canvas engine uses no heavy external 3D library.
+
+| Route | Workspace |
+| --- | --- |
+| `/` | Landing page |
+| `/login`, `/register`, `/forgot-password` | Authentication and password reset |
+| `/dashboard` | Storage metrics and recent uploads |
+| `/connect-telegram` | 3-step Telegram authorization flow |
+| `/files` | File explorer |
+| `/files/documents`, `/files/images`, `/files/videos`, `/files/audio`, `/files/archives` | Filtered file views |
+| `/favorites`, `/recent` | Starred files and recent uploads |
+| `/ai-search` | Natural-language search |
+| `/analytics` | Storage analytics |
+| `/settings`, `/privacy` | Account settings and privacy information |
 
 ## Tech Stack
 
@@ -70,7 +89,7 @@ The interface uses a monochrome black-and-white theme with HTML5 canvas visual e
 
 ## Project Structure
 
-The repository follows a Next.js application layout with API routes, components (including 3D canvas components described in the original README), database schema files, and tests. Refer to the repository itself for the complete, current file layout.
+The repository follows a Next.js application layout with API routes under `src/app/api`, UI components under `src/components` (including 3D canvas components under `src/components/3d`), Prisma schema files under `prisma`, and tests under `tests`. Refer to the repository itself for the complete, current file layout.
 
 ## Getting Started
 
@@ -87,6 +106,30 @@ git clone https://github.com/Kshaurya-07/StorageVault.git
 cd StorageVault
 npm install
 cp .env.example .env
+```
+
+### Environment
+
+Create a local `.env` file from the example. The values below are placeholders only:
+
+```env
+PORT=3000
+DATABASE_URL="file:./dev.db"
+JWT_SECRET="<at-least-32-characters>"
+ENCRYPTION_KEY="<64-hexadecimal-characters>"
+TELEGRAM_MODE="mock"
+TELEGRAM_API_ID=<your-numeric-api-id>
+TELEGRAM_API_HASH="<your-telegram-api-hash>"
+AI_PROVIDER="local"
+```
+
+Replace every placeholder with your own value. Do not commit real secrets to the repository.
+
+Generate secrets locally when needed, for example:
+
+```bash
+openssl rand -base64 32
+openssl rand -hex 32
 ```
 
 ### Database setup
@@ -110,7 +153,7 @@ npm test
 npm run dev
 ```
 
-Open http://localhost:3000 in your browser, as described in the original README.
+Open http://localhost:3000 in your browser.
 
 ## Telegram Configuration
 
@@ -128,24 +171,32 @@ Set `TELEGRAM_MODE="real"` and provide your own Telegram API credentials:
 2. Open **API development tools** and create an app.
 3. Copy your numerical `api_id` and hexadecimal `api_hash`.
 4. Set `TELEGRAM_API_ID` and `TELEGRAM_API_HASH` in `.env`.
-5. Restart the server and complete the 3-step authorization flow at `/connect-telegram`.
+5. Restart the server and complete the 3-step authorization flow at `/connect-telegram`: phone number, confirmation code, then cloud 2FA password.
 
 ## Uploads
 
-- Files up to 2 GB are described as streaming directly through the upload endpoint.
-- Files larger than 2 GB, up to 50 GB as described in the original README, are split in the browser into 512 MB chunks and uploaded through the chunk endpoints.
-- Uploads use a concurrent queue, and a deterministic fingerprint based on file name, size, and last-modified time is used to resume missing chunks.
-- During download, chunks are streamed sequentially from Telegram and reassembled on demand, as described in the original README.
+- Files up to 2 GB stream directly through the upload endpoint.
+- Files larger than 2 GB, up to 50 GB, are split in the browser into 512 MB chunks and uploaded through the chunk endpoints.
+- Uploads use a concurrent queue with a concurrency limit of 3.
+- A deterministic fingerprint based on file name, size, and last-modified time (`name|size|lastModified`) identifies an upload session, so a re-upload resumes only the missing chunks.
+- During download, chunks are streamed sequentially from Telegram and reassembled on demand, without buffering the entire file in server memory.
 
 ## AI Search
 
-The AI search feature translates plain-language queries into database filters. Examples from the original README include finding documents by keyword, filtering PDFs by date, and filtering by file size or category.
+AI search translates plain-language queries into database filters.
 
-Security properties described in the original README include:
+| Example query | Result |
+| --- | --- |
+| "Find my Java notes" | Documents matching the keywords `java` and `notes` |
+| "Show PDFs uploaded last week" | PDF documents from the last 7 days |
+| "Show videos larger than 100 MB" | Videos larger than 104,857,600 bytes |
+| "Show files smaller than 10 MB uploaded yesterday" | Files smaller than 10,485,760 bytes from yesterday |
+
+Security properties of AI search:
 
 - No model training on user queries or file metadata
-- Stateless, ephemeral requests
-- Ownership filters applied before results are returned
+- Stateless, ephemeral requests with no cross-session memory
+- Ownership filters are applied before results are returned
 
 ## API Reference
 
@@ -177,28 +228,46 @@ Security properties described in the original README include:
 - `GET /api/files/[id]/download` — Stream a file download
 - `POST /api/files/[id]/tags` — Add or remove tags
 
-### Chunked uploads, search, and analytics
+### Chunked uploads
 
-- `POST /api/files/chunks/init`, `POST /api/files/chunks`, `GET /api/files/chunks/status`, `POST /api/files/chunks/complete`, `POST /api/files/chunks/cancel`
+- `POST /api/files/chunks/init` — Initialize a chunked upload session
+- `POST /api/files/chunks` — Upload a single 512 MB chunk
+- `GET /api/files/chunks/status` — Check which chunks have been received, for resume
+- `POST /api/files/chunks/complete` — Validate all chunks and finalize the file
+- `POST /api/files/chunks/cancel` — Abort an upload session and clean up temporary parts
+
+### Search and analytics
+
 - `POST /api/ai/search` — Natural-language search
 - `GET /api/analytics` — Storage metrics by category and timeline
 
 ## Security
 
-| Area | Specification, as described in the original README |
+| Area | Specification |
 | --- | --- |
 | Session cookies | HttpOnly, SameSite=Lax, Secure in production, HS256 JWT |
-| Passwords | Salted bcrypt hashes |
-| Telegram sessions | AES-256-GCM encryption with random IVs at rest |
+| Passwords | Salted bcrypt hashes, 10 salt rounds |
+| Telegram sessions | AES-256-GCM encryption with random 12-byte IVs at rest |
 | Tenant isolation | Server-side owner filtering on queries |
-| File storage | Ephemeral memory streams; no permanent server disk copies described |
+| File storage | Ephemeral memory streams; no permanent server disk copies |
 | Content handling | Inline previews restricted to verified image, audio, and video types; `X-Content-Type-Options: nosniff` |
 | Clickjacking | `X-Frame-Options: DENY` |
 | Rate limiting | Sliding-window throttles on sensitive endpoints |
 
 ## Testing
 
-The original README describes a Jest test suite covering chunked uploads, streaming uploads, tenant isolation, authentication, mailer behaviour, Telegram flows, cryptography, and AI search parsing. It states 8 test suites and 50 tests; those counts are as described in the original README and were not independently re-run for this rewrite.
+The Jest test suite covers chunked uploads, streaming uploads, tenant isolation, authentication, mailer behaviour, Telegram flows, cryptography, and AI search parsing:
+
+1. `tests/chunkedUpload.test.ts` — Chunk initialization, size verification, reassembly, and stale-session cleanup
+2. `tests/streamingUpload.test.ts` — Streaming multipart parsing, temporary file lifecycle, and cleanup
+3. `tests/isolation.test.ts` — Cross-tenant isolation: one user cannot read, query, or delete another user's files
+4. `tests/auth.test.ts` — Bcrypt hashing, JWT signing, verification, and expiration
+5. `tests/mailer.test.ts` — Password reset URL generation, SMTP detection, and email dispatch
+6. `tests/telegram.test.ts` — Code dispatch, sign-in, 2FA, file upload, download, and deletion
+7. `tests/crypto.test.ts` — AES-256-GCM encryption, random IV variance, and tamper detection
+8. `tests/ai-search.test.ts` — Natural-language query parsing across date, size, category, and keyword filters
+
+The suite is reported as 8 test suites and 50 tests. Those counts were not independently re-run for this rewrite.
 
 ```bash
 npm test
@@ -208,31 +277,33 @@ npm test
 
 ### Render
 
-Deploy as a Node web service, connecting this repository and setting the production environment variables below. The original README lists:
+Deploy as a Node web service, connecting this repository and setting the production environment variables below.
 
 - Build command: `npm install && npx prisma generate --schema=prisma/schema.prisma && npm run build`
 - Start command: `npm start`
 
+Set `NODE_ENV=production` and `NEXT_PUBLIC_APP_URL` to the production URL in the Render environment settings.
+
 ### Docker
 
-The original README includes a multi-stage Dockerfile that builds the Next.js application and runs it with Node 20 Alpine. Refer to that Dockerfile in the repository for the current, complete version.
+The repository includes a multi-stage Dockerfile that builds the Next.js application and runs it with Node 20 Alpine. Refer to that Dockerfile in the repository for the current, complete version.
 
 ## Environment Variables
 
-| Variable | Description |
-| --- | --- |
-| `PORT` | HTTP server port, for example `3000` |
-| `NEXT_PUBLIC_APP_URL` | Public URL for reset links, required in production |
-| `DATABASE_URL` | PostgreSQL or SQLite database URI |
-| `JWT_SECRET` | Secret for signing session JWTs, at least 32 characters |
-| `ENCRYPTION_KEY` | 64 hexadecimal characters for AES-256-GCM |
-| `TELEGRAM_MODE` | `"real"` or `"mock"` |
-| `TELEGRAM_API_ID` | Telegram numerical API ID |
-| `TELEGRAM_API_HASH` | Telegram hexadecimal API hash |
-| `AI_PROVIDER` | Optional: `"local"`, `"gemini"`, or `"openai"` |
-| `GEMINI_API_KEY` | Optional, for Gemini |
-| `OPENAI_API_KEY` | Optional, for OpenAI |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Optional SMTP settings for password resets |
+| Variable | Required | Description |
+| --- | --- | --- |
+| `PORT` | Optional | HTTP server port, for example `3000` |
+| `NEXT_PUBLIC_APP_URL` | Required in production | Public URL for reset links |
+| `DATABASE_URL` | Required | PostgreSQL or SQLite database URI |
+| `JWT_SECRET` | Required | Secret for signing session JWTs, at least 32 characters |
+| `ENCRYPTION_KEY` | Required | 64 hexadecimal characters for AES-256-GCM |
+| `TELEGRAM_MODE` | Required | `"real"` or `"mock"` |
+| `TELEGRAM_API_ID` | Required in real mode | Telegram numerical API ID |
+| `TELEGRAM_API_HASH` | Required in real mode | Telegram hexadecimal API hash |
+| `AI_PROVIDER` | Optional | `"local"`, `"gemini"`, or `"openai"` |
+| `GEMINI_API_KEY` | Optional | API key for Gemini |
+| `OPENAI_API_KEY` | Optional | API key for OpenAI |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Optional | SMTP settings for password resets |
 
 Replace all placeholder values with your own secrets. Do not commit real secrets to the repository.
 
