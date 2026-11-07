@@ -32,8 +32,8 @@ services:
         sync: false
       - key: TELEGRAM_API_HASH
         sync: false
-      - key: AI_PROVIDER
-        value: local
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
       - key: MAX_FILE_SIZE_BYTES
         value: "2097152000"
       - key: SMTP_HOST

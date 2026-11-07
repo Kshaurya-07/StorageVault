@@ -120,7 +120,6 @@ ENCRYPTION_KEY="<64-hexadecimal-characters>"
 TELEGRAM_MODE="mock"
 TELEGRAM_API_ID=<your-numeric-api-id>
 TELEGRAM_API_HASH="<your-telegram-api-hash>"
-AI_PROVIDER="local"
 ```
 
 Replace every placeholder with your own value. Do not commit real secrets to the repository.
@@ -300,9 +299,6 @@ The repository includes a multi-stage Dockerfile that builds the Next.js applica
 | `TELEGRAM_MODE` | Required | `"real"` or `"mock"` |
 | `TELEGRAM_API_ID` | Required in real mode | Telegram numerical API ID |
 | `TELEGRAM_API_HASH` | Required in real mode | Telegram hexadecimal API hash |
-| `AI_PROVIDER` | Optional | `"local"`, `"gemini"`, or `"openai"` |
-| `GEMINI_API_KEY` | Optional | API key for Gemini |
-| `OPENAI_API_KEY` | Optional | API key for OpenAI |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Optional | SMTP settings for password resets |
 
 Replace all placeholder values with your own secrets. Do not commit real secrets to the repository.
