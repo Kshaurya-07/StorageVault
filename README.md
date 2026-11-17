@@ -50,6 +50,7 @@ StorageVault gives each user a private cloud drive built on the Telegram account
 - Dashboard with storage metrics and recent uploads
 - Telegram connection wizard
 - File explorer with grid and list views, search, sorting, tags, and bulk actions
+- Background upload queue — uploads keep running if the upload dialog is closed, with a floating progress indicator
 - Filtered views for documents, images, videos, audio, and archives
 - Favorites and recent uploads
 - AI-assisted natural-language search
@@ -177,6 +178,8 @@ Set `TELEGRAM_MODE="real"` and provide your own Telegram API credentials:
 - Files up to 2 GB stream directly through the upload endpoint.
 - Files larger than 2 GB, up to 50 GB, are split in the browser into 512 MB chunks and uploaded through the chunk endpoints.
 - Uploads use a concurrent queue with a concurrency limit of 3.
+- Uploads run in the background: closing the upload dialog does not cancel an upload, and a floating progress indicator shows overall progress.
+- Single-file uploads have a 90-second server timeout; a stalled upload returns a `504 UPLOAD_TIMEOUT` instead of hanging.
 - A deterministic fingerprint based on file name, size, and last-modified time (`name|size|lastModified`) identifies an upload session, so a re-upload resumes only the missing chunks.
 - During download, chunks are streamed sequentially from Telegram and reassembled on demand, without buffering the entire file in server memory.
 
@@ -276,10 +279,12 @@ npm test
 
 ### Render
 
-Deploy as a Node web service, connecting this repository and setting the production environment variables below.
+Deploy as a Node web service, connecting this repository and setting the production environment variables below. The repository's `render.yaml` defines the service (`vault-ai`, Oregon region) and its database.
 
-- Build command: `npm install && npx prisma generate --schema=prisma/schema.prisma && npm run build`
-- Start command: `npm start`
+- Build command: `npm install --include=dev && npx prisma generate --schema=prisma/schema.prisma && npm run build`
+- Start command: `npx prisma migrate deploy --schema=prisma/schema.prisma && npm start`
+
+The start command applies pending database migrations before starting the server.
 
 Set `NODE_ENV=production` and `NEXT_PUBLIC_APP_URL` to the production URL in the Render environment settings.
 
