@@ -269,7 +269,7 @@ The Jest test suite covers chunked uploads, streaming uploads, tenant isolation,
 7. `tests/crypto.test.ts` — AES-256-GCM encryption, random IV variance, and tamper detection
 8. `tests/ai-search.test.ts` — Natural-language query parsing across date, size, category, and keyword filters
 
-The suite is reported as 8 test suites and 50 tests. Those counts were not independently re-run for this rewrite.
+The suite contains 8 test suites and 50 tests. Running `npm test` first prepares a SQLite development database (via `scripts/test-runner.js`), then runs Jest.
 
 ```bash
 npm test
@@ -304,6 +304,10 @@ The repository includes a multi-stage Dockerfile that builds the Next.js applica
 | `TELEGRAM_MODE` | Required | `"real"` or `"mock"` |
 | `TELEGRAM_API_ID` | Required in real mode | Telegram numerical API ID |
 | `TELEGRAM_API_HASH` | Required in real mode | Telegram hexadecimal API hash |
+| `MAX_FILE_SIZE_BYTES` | Optional | Maximum single-file upload size in bytes; default `2097152000` (2 GB) |
+| `MAX_CHUNKED_FILE_SIZE_BYTES` | Optional | Maximum total size for chunked uploads in bytes; default `53687091200` (50 GB) |
+| `TEMP_UPLOAD_DIR` | Optional | Directory for temporary upload parts; default `./tmp/uploads` |
+| `SMTP_SECURE` | Optional | Set to `"true"` to force SSL for SMTP; otherwise auto-detected from port 465 |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Optional | SMTP settings for password resets |
 
 Replace all placeholder values with your own secrets. Do not commit real secrets to the repository.
